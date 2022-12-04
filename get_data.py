@@ -15,7 +15,7 @@ stock_data = []
 
 # Get the data for all stocks
 for sym in NASDAQ_symbols:
-    request = TA_Handler(screener='america', exchange='NASDAQ', symbol=sym)
+    request = TA_Handler(screener='america', exchange='NASDAQ', symbol=sym, interval=Interval.INTERVAL_1_DAY)
     output = request.get_analysis().indicators
     new_dict = {}
     new_dict['symbol'] = sym
@@ -28,7 +28,7 @@ for sym in NASDAQ_symbols:
     stock_data.append(new_dict)
 
 for sym in NYSE_symbols:
-    request = TA_Handler(screener='america', exchange='NYSE', symbol=sym)
+    request = TA_Handler(screener='america', exchange='NYSE', symbol=sym, interval=Interval.INTERVAL_1_DAY)
     output = request.get_analysis().indicators
     new_dict = {}
     new_dict['symbol'] = sym
@@ -62,6 +62,7 @@ for stock in stock_data:
         if (float(stock['price'])) < (float(stock['pivot middle'])):
             good_stocks.append(stock)
 
+
 # Output data to CSV file
 
 keys = good_stocks[0].keys()
@@ -70,6 +71,13 @@ with open('./results/Good_Stocks.csv', 'w', newline='') as output_file:
     dict_writer = csv.DictWriter(output_file, keys)
     dict_writer.writeheader()
     dict_writer.writerows(good_stocks)
+
+with open('./results/All_Stocks.csv', 'w', newline='') as output_file:
+    dict_writer = csv.DictWriter(output_file, keys)
+    dict_writer.writeheader()
+    dict_writer.writerows(stock_data)
+
+
 
 
 
