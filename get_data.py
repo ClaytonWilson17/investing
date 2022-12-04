@@ -6,6 +6,7 @@ from tradingview_ta import TA_Handler, Interval
 import itertools
 from openpyxl import Workbook
 import csv
+import pandas as pd
 
 NASDAQ_symbols = ['CSX', 'AMD', 'GOOGL', 'AMZN', 'DBX', 'AAPL', 'SBUX', 'MSFT', 'CSCO', 'TSCO', 'NVDA']
 NYSE_symbols = ['BAC', 'SYF', 'IBM', 'DKS', 'KR', 'UNH', 'DUK', 'TM', 'CNI', 'V', 'DE', 'FE', 'MA', 'O', 'LMT', 'WMT', 'DGX', 'WM', 'GIS', 'JPM', 'T', 'ABBV', 'JNJ', 'VALE', 'LOW', 'LEN', 'CVX', 'XOM', 'CAT', 'NKE']
@@ -18,12 +19,12 @@ for sym in NASDAQ_symbols:
     request = TA_Handler(screener='america', exchange='NASDAQ', symbol=sym, interval=Interval.INTERVAL_1_DAY)
     output = request.get_analysis().indicators
     new_dict = {}
-    new_dict['symbol'] = sym
-    new_dict['price'] = output['close']
+    new_dict['Symbol'] = sym
+    new_dict['Price'] = output['close']
     new_dict['RSI'] = output['RSI']
-    new_dict['pivot middle'] = output['Pivot.M.Classic.Middle']
-    new_dict['pivot support 1'] = output['Pivot.M.Classic.S1']
-    new_dict['pivot support 2'] = output['Pivot.M.Classic.S2']
+    new_dict['Pivot middle'] = output['Pivot.M.Classic.Middle']
+    new_dict['Pivot support 1'] = output['Pivot.M.Classic.S1']
+    new_dict['Pivot support 2'] = output['Pivot.M.Classic.S2']
     
     stock_data.append(new_dict)
 
@@ -31,12 +32,12 @@ for sym in NYSE_symbols:
     request = TA_Handler(screener='america', exchange='NYSE', symbol=sym, interval=Interval.INTERVAL_1_DAY)
     output = request.get_analysis().indicators
     new_dict = {}
-    new_dict['symbol'] = sym
-    new_dict['price'] = output['close']
+    new_dict['Symbol'] = sym
+    new_dict['Price'] = output['close']
     new_dict['RSI'] = output['RSI']
-    new_dict['pivot middle'] = output['Pivot.M.Classic.Middle']
-    new_dict['pivot support 1'] = output['Pivot.M.Classic.S1']
-    new_dict['pivot support 2'] = output['Pivot.M.Classic.S2']
+    new_dict['Pivot middle'] = output['Pivot.M.Classic.Middle']
+    new_dict['Pivot support 1'] = output['Pivot.M.Classic.S1']
+    new_dict['Pivot support 2'] = output['Pivot.M.Classic.S2']
 
     stock_data.append(new_dict)
 
@@ -59,7 +60,7 @@ good_stocks = []
 
 for stock in stock_data:
     if (float(stock['RSI']) < 50):
-        if (float(stock['price'])) < (float(stock['pivot middle'])):
+        if (float(stock['Price'])) < (float(stock['Pivot middle'])):
             good_stocks.append(stock)
 
 
@@ -79,6 +80,21 @@ with open('./results/All_Stocks.csv', 'w', newline='') as output_file:
 
 
 
+df = pd.DataFrame(stock_data)
 
+
+html_string = '''
+<html>
+  <head><title>Stock Report</title></head>
+  <link rel="stylesheet" type="text/css" href="dataframe_style.css"/>
+  <body>
+    {table}
+  </body>
+</html>.
+'''
+
+# OUTPUT AN HTML FILE
+with open('results/result.html', 'w') as f:
+    f.write(html_string.format(table=df.to_html(justify='left', classes='mystyle')))
 
 
