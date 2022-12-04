@@ -15,6 +15,7 @@ stock_data = []
 
 
 # Get the data for all stocks
+print ("\nCollecting data for all stocks...\n")
 for sym in NASDAQ_symbols:
     request = TA_Handler(screener='america', exchange='NASDAQ', symbol=sym, interval=Interval.INTERVAL_1_DAY)
     output = request.get_analysis().indicators
@@ -55,7 +56,7 @@ for sym in NYSE_symbols:
 
 # Determine if stock is 'good' to sell a put on
 # A stock is determined good if the RSI is below 50, and the price of the stock is below the middle pivot point
-
+print ("Determining which stocks are good to sell a put on...\n")
 good_stocks = []
 
 for stock in stock_data:
@@ -65,7 +66,7 @@ for stock in stock_data:
 
 
 # Output data to CSV file
-
+print("Creating reports...\n")
 keys = good_stocks[0].keys()
 
 with open('./results/Good_Stocks.csv', 'w', newline='') as output_file:
@@ -79,8 +80,12 @@ with open('./results/All_Stocks.csv', 'w', newline='') as output_file:
     dict_writer.writerows(stock_data)
 
 
+# Format data for HTML files
+df_all_stocks = pd.DataFrame(stock_data)
+df_all_stocks = df_all_stocks.sort_values(by=['RSI'])
 
-df = pd.DataFrame(stock_data)
+df_good_stocks = pd.DataFrame(good_stocks)
+df_good_stocks = df_good_stocks.sort_values(by=['RSI'])
 
 
 html_string = '''
@@ -93,8 +98,12 @@ html_string = '''
 </html>.
 '''
 
-# OUTPUT AN HTML FILE
-with open('results/result.html', 'w') as f:
-    f.write(html_string.format(table=df.to_html(justify='left', classes='mystyle')))
+# Create HTML files
+with open('results/All_Stocks.html', 'w') as f:
+    f.write(html_string.format(table=df_all_stocks.to_html(justify='left', classes='mystyle')))
+
+with open('results/Good_Stocks.html', 'w') as f:
+    f.write(html_string.format(table=df_good_stocks.to_html(justify='left', classes='mystyle')))
 
 
+print ("Results saved to the results directory.\n")
