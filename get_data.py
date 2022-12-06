@@ -80,30 +80,4 @@ with open('./results/All_Stocks.csv', 'w', newline='') as output_file:
     dict_writer.writerows(stock_data)
 
 
-# Format data for HTML files
-df_all_stocks = pd.DataFrame(stock_data)
-df_all_stocks = df_all_stocks.sort_values(by=['RSI'])
-
-df_good_stocks = pd.DataFrame(good_stocks)
-df_good_stocks = df_good_stocks.sort_values(by=['RSI'])
-
-
-html_string = '''
-<html>
-  <head><title>Stock Report</title></head>
-  <link rel="stylesheet" type="text/css" href="dataframe_style.css"/>
-  <body>
-    {table}
-  </body>
-</html>.
-'''
-
-# Create HTML files
-with open('results/All_Stocks.html', 'w') as f:
-    f.write(html_string.format(table=df_all_stocks.to_html(justify='left', classes='mystyle')))
-
-with open('results/Good_Stocks.html', 'w') as f:
-    f.write(html_string.format(table=df_good_stocks.to_html(justify='left', classes='mystyle')))
-
-
 print ("Results saved to the results directory.\n")
