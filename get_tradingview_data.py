@@ -26,6 +26,7 @@ for sym in NASDAQ_symbols:
     new_dict['Pivot middle'] = output['Pivot.M.Classic.Middle']
     new_dict['Pivot support 1'] = output['Pivot.M.Classic.S1']
     new_dict['Pivot support 2'] = output['Pivot.M.Classic.S2']
+    new_dict['Chart Link'] = 'https://finance.yahoo.com/quote/' + str(sym) + '/chart?p=' + str(sym)
     
     stock_data.append(new_dict)
 
@@ -39,7 +40,8 @@ for sym in NYSE_symbols:
     new_dict['Pivot middle'] = output['Pivot.M.Classic.Middle']
     new_dict['Pivot support 1'] = output['Pivot.M.Classic.S1']
     new_dict['Pivot support 2'] = output['Pivot.M.Classic.S2']
-
+    new_dict['Chart Link'] = 'https://finance.yahoo.com/quote/' + str(sym) + '/chart?' 
+    
     stock_data.append(new_dict)
 
 
@@ -52,6 +54,7 @@ for sym in NYSE_symbols:
 # 'Pivot.M.Camarilla.R1', 'Pivot.M.Camarilla.R2', 'Pivot.M.Camarilla.R3', 'Pivot.M.Woodie.S3', 'Pivot.M.Woodie.S2', 'Pivot.M.Woodie.S1', 'Pivot.M.Woodie.Middle', 'Pivot.M.Woodie.R1', 
 # 'Pivot.M.Woodie.R2', 'Pivot.M.Woodie.R3', 'Pivot.M.Demark.S1', 'Pivot.M.Demark.Middle', 'Pivot.M.Demark.R1', 'open', 'P.SAR', 'BB.lower', 'BB.upper', 'AO[2]', 'volume', 'change', 
 # 'low', 'high']
+
  
 
 # Determine if stock is 'good' to sell a put on
