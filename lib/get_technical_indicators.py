@@ -37,6 +37,8 @@ def get_tech_indicators(NYSE_symbols, NASDAQ_symbols):
         new_dict['Pivot middle'] = output['Pivot.M.Classic.Middle']
         new_dict['Pivot support 1'] = output['Pivot.M.Classic.S1']
         new_dict['Pivot support 2'] = output['Pivot.M.Classic.S2']
+        new_dict['MACD_line'] = output['MACD.macd']
+        new_dict['MACD_signal'] = output['MACD.signal']
         new_dict['Chart Link'] = 'https://finance.yahoo.com/quote/' + str(sym) + '/chart?p=' + str(sym)
         
         stock_data.append(new_dict)
@@ -51,6 +53,8 @@ def get_tech_indicators(NYSE_symbols, NASDAQ_symbols):
         new_dict['Pivot middle'] = output['Pivot.M.Classic.Middle']
         new_dict['Pivot support 1'] = output['Pivot.M.Classic.S1']
         new_dict['Pivot support 2'] = output['Pivot.M.Classic.S2']
+        new_dict['MACD_line'] = output['MACD.macd']
+        new_dict['MACD_signal'] = output['MACD.signal']
         new_dict['Chart Link'] = 'https://finance.yahoo.com/quote/' + str(sym) + '/chart?' 
         
         stock_data.append(new_dict)
