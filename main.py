@@ -16,8 +16,7 @@ stocks_to_buy = []
 for data in technical_data:
     signal = buy_signal.determine_buy_signals(data['Price'], data['RSI'], data['Pivot support 1'], data['Pivot support 1'], data['MACD_line'], data['MACD_signal'])
     if signal == True:
-        stocks_to_buy.append(data['Symbol'])
+        stocks_to_buy.append(data)
 
-print (stocks_to_buy)
-#output_to_csv.print_to_csv(technical_data, 'testing')
+output_to_csv.print_to_csv(stocks_to_buy, 'testing')
 
