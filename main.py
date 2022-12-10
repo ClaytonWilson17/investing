@@ -10,8 +10,14 @@ technical_data = []
 technical_data =get_technical_indicators.get_tech_indicators(NYSE_symbols=NYSE_symbols, NASDAQ_symbols=NASDAQ_symbols)
 # Returns the following keys: Symbol, Price, RSI, Pivot middle, Pivot support 1, Pivot support 2, MACD_line, MACD_signal
 
+buy_indicators = []
+stocks_to_buy = []
 
-buy_indicators = buy_signal.determine_buy_signals()
+for data in technical_data:
+    signal = buy_signal.determine_buy_signals(data['Price'], data['RSI'], data['Pivot support 1'], data['Pivot support 1'], data['MACD_line'], data['MACD_signal'])
+    if signal == True:
+        stocks_to_buy.append(data['Symbol'])
 
-output_to_csv.print_to_csv(technical_data, 'testing')
+print (stocks_to_buy)
+#output_to_csv.print_to_csv(technical_data, 'testing')
 
