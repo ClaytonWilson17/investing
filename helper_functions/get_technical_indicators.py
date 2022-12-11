@@ -3,8 +3,11 @@
 # documentation to help know how to use the python module: 
 #  https://python-tradingview-ta.readthedocs.io/en/latest/usage.html
 #  https://tvdb.brianthe.dev/
+#  https://python-tradingview-ta.readthedocs.io/_/downloads/en/latest/pdf/
+#  https://pastebin.com/1DjWv2Hd
 
 from tradingview_ta import TA_Handler, Interval
+import ta
 import itertools
 import csv
 import pandas as pd
@@ -23,12 +26,12 @@ def get_tech_indicators(NYSE_symbols, NASDAQ_symbols):
     '''
     stock_data = []
 
-
     # Get the data for all stocks
     print ("\nCollecting data for all stocks...\n")
     for sym in NASDAQ_symbols:
         request = TA_Handler(screener='america', exchange='NASDAQ', symbol=sym, interval=Interval.INTERVAL_1_DAY)
-        output = request.get_analysis().indicators
+        request.add_indicators(indicators=["KltChnl.lower", "KltChnl.upper"])
+        output = request.get_indicators()
         new_dict = {}
         new_dict['Symbol'] = sym
         new_dict['Price'] = output['close']
@@ -38,13 +41,21 @@ def get_tech_indicators(NYSE_symbols, NASDAQ_symbols):
         new_dict['Pivot support 2'] = output['Pivot.M.Classic.S2']
         new_dict['MACD_line'] = output['MACD.macd']
         new_dict['MACD_signal'] = output['MACD.signal']
+        try:
+            new_dict['Keltner lower'] = output['KltChnl.lower']
+            new_dict['Keltner upper'] = output['KltChnl.upper']
+        except:
+            new_dict['Keltner lower'] = 10000000
+            new_dict['Keltner upper'] = 0
+
         new_dict['Chart Link'] = 'https://finance.yahoo.com/quote/' + str(sym) + '/chart?p=' + str(sym)
         
         stock_data.append(new_dict)
 
     for sym in NYSE_symbols:
         request = TA_Handler(screener='america', exchange='NYSE', symbol=sym, interval=Interval.INTERVAL_1_DAY)
-        output = request.get_analysis().indicators
+        request.add_indicators(indicators=["KltChnl.lower", "KltChnl.upper"])
+        output = request.get_indicators()
         new_dict = {}
         new_dict['Symbol'] = sym
         new_dict['Price'] = output['close']
@@ -54,6 +65,12 @@ def get_tech_indicators(NYSE_symbols, NASDAQ_symbols):
         new_dict['Pivot support 2'] = output['Pivot.M.Classic.S2']
         new_dict['MACD_line'] = output['MACD.macd']
         new_dict['MACD_signal'] = output['MACD.signal']
+        try:
+            new_dict['Keltner lower'] = output['KltChnl.lower']
+            new_dict['Keltner upper'] = output['KltChnl.upper']
+        except:
+            new_dict['Keltner lower'] = 10000000
+            new_dict['Keltner upper'] = 0
         new_dict['Chart Link'] = 'https://finance.yahoo.com/quote/' + str(sym) + '/chart?' 
         
         stock_data.append(new_dict)
@@ -70,3 +87,5 @@ def get_tech_indicators(NYSE_symbols, NASDAQ_symbols):
     # 'low', 'high']
 
     return(stock_data)
+
+

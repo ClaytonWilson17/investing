@@ -1,6 +1,6 @@
 # Main file which controls all of the inputs to the functions
 
-from helper_functions import get_technical_indicators, output_to_csv, sell_signal, buy_signal
+from helper_functions import get_technical_indicators, sell_signal, buy_signal, general
 
 # List of stocks to get technical indicator data on
 NASDAQ_symbols = ['CSX', 'AMD', 'GOOGL', 'AMZN', 'DBX', 'AAPL', 'SBUX', 'MSFT', 'CSCO', 'TSCO', 'NVDA']
@@ -18,5 +18,5 @@ for data in technical_data:
     if signal == True:
         stocks_to_buy.append(data)
 
-output_to_csv.print_to_csv(stocks_to_buy, 'testing')
-
+path = general.resultsPath('testing.csv')
+general.listOfDictsToCSV(stocks_to_buy, path)
