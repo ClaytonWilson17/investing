@@ -6,7 +6,6 @@
 
 from tradingview_ta import TA_Handler, Interval
 import itertools
-from openpyxl import Workbook
 import csv
 import pandas as pd
 
