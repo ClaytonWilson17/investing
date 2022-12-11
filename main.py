@@ -18,5 +18,8 @@ for data in technical_data:
     if signal == True:
         stocks_to_buy.append(data)
 
-path = general.resultsPath('testing.csv')
+path = general.resultsPath('Buy Signal.csv')
 general.listOfDictsToCSV(stocks_to_buy, path)
+path = general.resultsPath('All Stocks.csv')
+general.listOfDictsToCSV(technical_data, path)
+
