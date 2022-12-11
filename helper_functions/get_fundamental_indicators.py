@@ -101,7 +101,7 @@ def is_increasing(dictionary):
     return True
 
 
-def write_symbols_to_csv(cache=True):
+def write_symbols_to_csv(cache=False):
     start_time = time.time()
     stocks = get_symbol_data()
     # cache these results
