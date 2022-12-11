@@ -188,8 +188,8 @@ def write_symbols_to_csv(cache=False):
                     good_stock['lookup'] = url
 
                     stock_data.append(good_stock)
-            else:
-                print(str(info.get('symbol'))+" has missing values...skipping")
+            #else:
+                #print(str(info.get('symbol'))+" has missing values...skipping")
         general.fileSaveCache(stock_data_path, stock_data)
         print("--- %s seconds to get all stock data  ---" % (round(time.time() - start_time,2)))
     # write to CSV
