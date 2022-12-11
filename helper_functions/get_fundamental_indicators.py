@@ -33,7 +33,7 @@ def get_all_symbols():
 def get_symbol_data():
     ticker_list = get_all_symbols()
     stock_data = []
-    for ticker in ticker_list[0:100]:
+    for ticker in ticker_list[]:
         data = yf.Ticker(ticker['Code'])
         stock_data.append({"data":data, "exchange":ticker['Exchange']})
     return stock_data
