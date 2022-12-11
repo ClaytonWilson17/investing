@@ -118,7 +118,7 @@ def write_symbols_to_csv(cache=False):
 
     if stock_data == []:
         #stocks[63:64] is ACGL which matches my filters for testing
-        for stock in stocks[]:
+        for stock in stocks:
             info = stock['data'].info
             if keys_not_missing(info.keys()):
                 good_stock = {}
