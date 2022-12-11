@@ -192,7 +192,9 @@ def write_symbols_to_csv(cache=False):
                 print(str(info.get('symbol'))+" has missing values...skipping")
         general.fileSaveCache(stock_data_path, stock_data)
         print("--- %s seconds to get all stock data  ---" % (round(time.time() - start_time,2)))
-        
+    # write to CSV
+    stock_csv_path = general.dataPath("all_stock_data.csv")
+    general.listOfDictsToCSV(stock_data, stock_csv_path)
     return stock_data
 
 
