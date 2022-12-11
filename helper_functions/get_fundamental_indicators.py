@@ -8,6 +8,7 @@ import os
 import json
 import requests
 import time
+import pandas as pd
 import yfinance as yf #https://github.com/ranaroussi/yfinance
 
 def get_all_symbols():
@@ -33,9 +34,8 @@ def get_symbol_data():
     ticker_list = get_all_symbols()
     stock_data = []
     for ticker in ticker_list[0:100]:
-        #data = yf.download(ticker['Code'], period = "5y")
         data = yf.Ticker(ticker['Code'])
-        stock_data.append(data)
+        stock_data.append({"data":data, "exchange":ticker['Exchange']})
     return stock_data
 
 def large_cap(market_cap):
@@ -100,18 +100,26 @@ def is_increasing(dictionary):
     # If all of the values in the dictionary are increasing, return True
     return True
 
+def get_stock_percentage_change(stock_oject, time):
+    history = stock_oject.history(period=time)
+    current = history['Close'][-1]
+    old = history['Close'][0]
+    return (current-old)/old
 
 def write_symbols_to_csv(cache=False):
     start_time = time.time()
     stocks = get_symbol_data()
     # cache these results
+    stock_data_path = general.dataPath("all_stock_data.pkl")
     if cache:
-        stock_data_path = general.dataPath("all_stock_data.pkl")
         stock_data = general.fileLoadCache(stock_data_path)
+    else:
+        stock_data = []
 
-    if stock_data is None:
-        for stock in stocks[63:64]:
-            info = stock.info
+    if stock_data == []:
+        #stocks[63:64] is ACGL which matches my filters for testing
+        for stock in stocks[]:
+            info = stock['data'].info
             if keys_not_missing(info.keys()):
                 good_stock = {}
                 # Basic info
@@ -127,6 +135,8 @@ def write_symbols_to_csv(cache=False):
                 if exDividendDate is not None:
                     from datetime import datetime
                     good_stock['exDividendDate'] = datetime.utcfromtimestamp(int(exDividendDate)).strftime('%c')
+                else:
+                    good_stock['exDividendDate'] = None
 
                 # EPS
                 good_stock['forwardEps'] = info['forwardEps']
@@ -149,24 +159,34 @@ def write_symbols_to_csv(cache=False):
 
                 # Only search these things if above filters are good
                 if large_cap(info['marketCap']) and good_pb_ratio(info['priceToBook']) and good_pe_ratio(info['forwardPE']):
-                    print(info['symbol']+" is a good stock")
+                    print(info['symbol']+" stock good")
                     # next earnings date
                     # 'Value'
-                    nextEarningsDate = (stock.calendar).to_dict()[0]['Earnings Date']
+                    nextEarningsDate = (stock['data'].calendar).to_dict()[0]['Earnings Date']
+                    good_stock['nextEarningsDate'] = nextEarningsDate
 
                     # Quarterly income
-                    earnings_info = (stock.get_earnings(freq="quarterly")).to_dict()
+                    earnings_info = (stock['data'].get_earnings(freq="quarterly")).to_dict()
                     good_stock['4Quarters_increasing_revenue'] = is_increasing(earnings_info['Revenue'])
                     good_stock['4Quarters_increasing_profit'] = is_increasing(earnings_info['Revenue'])
                     
                     # Yearly income
-                    earnings_info = (stock.get_earnings(freq="yearly")).to_dict()
+                    earnings_info = (stock['data'].get_earnings(freq="yearly")).to_dict()
                     good_stock['4years_increasing_revenue'] = is_increasing(earnings_info['Revenue'])
                     good_stock['4years_increasing_profit'] = is_increasing(earnings_info['Earnings'])
                     
-                    # Changes last: 1 month, 3 months, 6 months, 1 year, 5 year, 10 years
+                    # Changes last: 1 week, 1 month, 3 months, 6 months, 1 year, 5 year
+                    good_stock['pct_chg_5y'] = get_stock_percentage_change(stock['data'], "5y")
+                    good_stock['pct_chg_1y'] = get_stock_percentage_change(stock['data'], "1y")
+                    good_stock['pct_chg_6mo'] = get_stock_percentage_change(stock['data'], "6mo")
+                    good_stock['pct_chg_3mo'] = get_stock_percentage_change(stock['data'], "3mo")
+                    good_stock['pct_chg_1mo'] = get_stock_percentage_change(stock['data'], "1mo")
+                    good_stock['pct_chg_1wk'] = get_stock_percentage_change(stock['data'], "1wk")
                     
-                    
+                    # Google finance link
+                    url = "https://g.co/finance/"+info['symbol']+":"+stock['exchange']
+                    good_stock['lookup'] = url
+
                     stock_data.append(good_stock)
             else:
                 print(str(info.get('symbol'))+" has missing values...skipping")
@@ -174,4 +194,6 @@ def write_symbols_to_csv(cache=False):
         print("--- %s seconds to get all stock data  ---" % (round(time.time() - start_time,2)))
         
     return stock_data
+
+
 
