@@ -8,7 +8,7 @@ import os
 import json
 import requests
 import time
-import yfinance as yf
+import yfinance as yf #https://github.com/ranaroussi/yfinance
 
 def get_all_symbols():
     general.get_env_vars()
