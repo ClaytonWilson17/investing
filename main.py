@@ -18,10 +18,13 @@ for data in technical_data:
     if signal == True:
         stocks_to_buy.append(data)
 
-path = general.resultsPath('testing.csv')
+path = general.resultsPath('Buy Signal.csv')
 general.listOfDictsToCSV(stocks_to_buy, path)
 
 subject = "Stock data for the day"
     body = "This is an email with attachment sent from Python"
     sender_email = "investingbot2@gmail.com"
     receiver_email = "crw2017@gmail.com"
+path = general.resultsPath('All Stocks.csv')
+general.listOfDictsToCSV(technical_data, path)
+
