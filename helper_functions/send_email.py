@@ -3,17 +3,18 @@ from email import encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-import general
+from helper_functions import general
 import os
 
 
-def send_email():
-    subject = "Stock data for the day"
-    body = "This is an email with attachment sent from Python"
+def send_email(subject, body, receiver_email, filename=None):
+    '''
+    Sends and email with one attachment
+    '''
+    
     sender_email = "investingbot2@gmail.com"
-    receiver_email = "crw2017@gmail.com"
     general.get_env_vars()
-    password = os.environ['KEY']
+    password = os.environ['GMAIL']
 
     # Create a multipart message and set headers
     message = MIMEMultipart()
@@ -24,10 +25,12 @@ def send_email():
     # Add body to email
     message.attach(MIMEText(body, "plain"))
 
-    filename = general.resultsPath('Buy Signal.csv')
+    if filename is None:
+        filename = general.resultsPath('All Stocks.csv')
+    
 
 
-    # Open PDF file in binary mode
+    # Open file in binary mode
     with open(filename, "rb") as attachment:
         # Add file as application/octet-stream
         # Email client can usually download this automatically as attachment
