@@ -1,6 +1,6 @@
 # Main file which controls all of the inputs to the functions
 
-from helper_functions import get_technical_indicators, sell_signal, buy_signal, general
+from helper_functions import get_technical_indicators, sell_signal, buy_signal, general, send_email
 
 # List of stocks to get technical indicator data on
 NASDAQ_symbols = ['CSX', 'AMD', 'GOOGL', 'AMZN', 'DBX', 'AAPL', 'SBUX', 'MSFT', 'CSCO', 'TSCO', 'NVDA']
@@ -18,8 +18,16 @@ for data in technical_data:
     if signal == True:
         stocks_to_buy.append(data)
 
-path = general.resultsPath('Buy Signal.csv')
-general.listOfDictsToCSV(stocks_to_buy, path)
-path = general.resultsPath('All Stocks.csv')
-general.listOfDictsToCSV(technical_data, path)
+buypath = general.resultsPath('Buy Signal.csv')
+general.listOfDictsToCSV(stocks_to_buy, buypath)
+allpath = general.resultsPath('All Stocks.csv')
+general.listOfDictsToCSV(technical_data, allpath)
+
+
+# Email out the files
+subject = "Stock data for the day"
+body = "This is an email containing stock data sent from the Python investing bot."
+receiver_email = "crw2017@gmail.com"
+
+send_email.send_email(subject=subject, body=body, receiver_email=receiver_email, filename=buypath)
 
