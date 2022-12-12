@@ -27,7 +27,7 @@ general.listOfDictsToCSV(technical_data, allpath)
 # Email out the files
 subject = "Stock data for the day"
 body = "This is an email containing stock data sent from the Python investing bot."
-receiver_email = "crw2017@gmail.com"
+receiver_email = ""
 
 send_email.send_email(subject=subject, body=body, receiver_email=receiver_email, filename=buypath)
 
