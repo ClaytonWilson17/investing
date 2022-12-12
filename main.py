@@ -29,5 +29,5 @@ subject = "Stock data for the day"
 body = "This is an email containing stock data sent from the Python investing bot."
 receiver_email = ""
 
-send_email.send_email(subject=subject, body=body, receiver_email=receiver_email, filename=buypath)
+#send_email.send_email(subject=subject, body=body, receiver_email=receiver_email, filename=buypath)
 
