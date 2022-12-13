@@ -2,7 +2,7 @@
 
 def buy_based_on_RSI(RSI):
     buy = False
-    if float(RSI) < float(31):    
+    if float(RSI) <= float(35):    
         buy = True
     return (buy)
 
@@ -50,17 +50,29 @@ def determine_buy_signals(price, RSI=None, pivot_support_1=None, lower_keltner_c
     buy_pivot = False
     buy_kelter = False
     buy_macd = False
+    signals_that_are_true = []
     
     if RSI is not None:
         buy_RSI = buy_based_on_RSI(RSI)
+        if buy_RSI is True:
+            signals_that_are_true.append("RSI")
+
     if pivot_support_1 is not None:
         buy_pivot = buy_based_on_pivot_points(price, pivot_support_1)
+        if buy_pivot is True:
+            signals_that_are_true.append("Support1")
+
     if lower_keltner_channel is not None:
         buy_kelter = buy_based_on_keltner_channel(price, lower_keltner_channel)
+        if buy_kelter is True:
+            signals_that_are_true.append("Keltner")
+
     if macd_line is not None and macd_signal is not None:
         buy_macd = buy_based_on_macd(macd_line, macd_signal)
+        if buy_macd is True:
+            signals_that_are_true.append("MACD")
 
     if buy_RSI is True or buy_kelter is True or buy_macd is True or buy_pivot is True:
-        return (True)
+        return ([True, signals_that_are_true])
     else:
-        return (False)
+        return ([False, ""])
