@@ -1,10 +1,15 @@
 # Main file which controls all of the inputs to the functions
 
-from helper_functions import get_technical_indicators, sell_signal, buy_signal, general, send_email
+from helper_functions import get_technical_indicators, sell_signal, buy_signal, general, send_email, get_fundamental_indicators
 
 # List of stocks to get technical indicator data on
 NASDAQ_symbols = ['CSX', 'AMD', 'GOOGL', 'AMZN', 'DBX', 'AAPL', 'SBUX', 'MSFT', 'CSCO', 'TSCO', 'NVDA']
 NYSE_symbols = ['BAC', 'SYF', 'IBM', 'DKS', 'KR', 'UNH', 'DUK', 'TM', 'CNI', 'V', 'DE', 'FE', 'MA', 'O', 'LMT', 'WMT', 'DGX', 'WM', 'GIS', 'JPM', 'T', 'ABBV', 'JNJ', 'VALE', 'LOW', 'LEN', 'CVX', 'XOM', 'CAT', 'NKE']
+
+
+# Get fundamental analysis data
+
+
 
 technical_data = []
 technical_data =get_technical_indicators.get_tech_indicators(NYSE_symbols=NYSE_symbols, NASDAQ_symbols=NASDAQ_symbols)
@@ -13,6 +18,7 @@ technical_data =get_technical_indicators.get_tech_indicators(NYSE_symbols=NYSE_s
 buy_indicators = []
 stocks_to_buy = []
 
+# Find which stocks are at a good time to sell a put
 for data in technical_data:
     signal = buy_signal.determine_buy_signals(data['Price'], data['RSI'], data['Pivot support 1'], data['Keltner lower'], data['MACD_line'], data['MACD_signal'])
     if signal[0] == True:
