@@ -7,7 +7,6 @@
 #  https://pastebin.com/1DjWv2Hd
 
 from tradingview_ta import TA_Handler, Interval
-import ta
 import itertools
 import csv
 import pandas as pd
