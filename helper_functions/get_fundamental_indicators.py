@@ -79,6 +79,11 @@ def good_dividend(dividend):
         return True
     else:
         return False
+def good_instutional_ownership(ratio):
+    if float(ratio) > .6:
+        return True
+    else:
+        return False
 def good_debt_ratio(debtToAssetsRatio):
     if debtToAssetsRatio < 1:
         return True
@@ -170,6 +175,7 @@ def get_good_stock_data(stock):
             good_stock['exchange'] = stock['exchange']
             good_stock['currentPrice'] = info['currentPrice']
             good_stock['marketCap'] = info['marketCap']
+            good_stock['heldPercentInstitutions'] = info['heldPercentInstitutions']
 
             # Dividends
             good_stock['dividendYield'] = info['dividendYield'] #0.0272=2.72%
@@ -209,7 +215,7 @@ def get_good_stock_data(stock):
             good_stock['floatShares'] = info['floatShares']
 
             # Only search these things if above filters are good
-            if large_cap(info['marketCap']) and affordable_price(info['currentPrice']) and good_pb_ratio(info['priceToBook']) and good_pe_ratio(info['forwardPE']) and good_debt_ratio(good_stock['debtToAssetsRatio']):
+            if large_cap(info['marketCap']) and good_instutional_ownership(info['heldPercentInstitutions']) and affordable_price(info['currentPrice']) and good_pb_ratio(info['priceToBook']) and good_pe_ratio(info['forwardPE']) and good_debt_ratio(good_stock['debtToAssetsRatio']):
                 # next earnings date
                 # for some reason, the data is not well formatted. 0 or "Value" as keys
                 earnings_object = (stock['data'].calendar).to_dict()
@@ -252,6 +258,19 @@ def get_good_stock_data(stock):
     except:
         return None
 
+def clean_for_csv(good_stocks):
+    keys_to_delete = ['sharesOutstanding', 'floatShares', 'debtToEquity', 'returnOnEquity', 'returnOnAssets', 'grossProfits', 'profitMargins', 'totalRevenue', 'debtToAssetsRatio', 'forwardEps', 'trailingEps', 'marketCap', '']
+    if isinstance(good_stocks, list):
+        for stock in good_stocks:
+            for key in keys_to_delete:
+                if key in stock:
+                    del stock[key]
+    else:
+        for key in keys_to_delete:
+            if key in good_stocks:
+                del good_stocks[key]
+    return good_stocks
+
 # for testing purposes the following are good stocks:
 # ACGL stock good
 # ADI stock good
@@ -280,6 +299,7 @@ def write_symbol_to_csv(symbol, exchange, cache=False):
         print("--- %s seconds to get all stock data  ---" % (round(time.time() - start_time,2)))
     # write to CSV
     if stock_data != []:
+        stock_data = clean_for_csv(stock_data)
         stock_csv_path = general.resultsPath(symbol+"_stock_data.csv")
         general.listOfDictsToCSV(stock_data, stock_csv_path)
     else:
@@ -287,7 +307,8 @@ def write_symbol_to_csv(symbol, exchange, cache=False):
     return stock_data
 
 # 118m to get through NASDAQ
-# m to get through NYSE
+# 165m to get through NYSE
+# 283m total
 def write_symbols_to_csv(cache=False):
     start_time = time.time()
     stocks = get_all_symbol_object()
@@ -307,6 +328,7 @@ def write_symbols_to_csv(cache=False):
         print("--- %s seconds to get all stock data  ---" % (round(time.time() - start_time,2)))
     # write to CSV
     if stock_data != []:
+        stock_data = clean_for_csv(stock_data)
         stock_csv_path = general.resultsPath("all_stock_data.csv")
         general.listOfDictsToCSV(stock_data, stock_csv_path)
         # write dividend stocks to seperate file
