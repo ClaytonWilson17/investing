@@ -58,16 +58,23 @@ def determine_sell_signals(price, RSI=None, pivot_resistance_1=None, upper_keltn
     
     if RSI is not None:
         sell_RSI = sell_based_on_RSI(RSI)
-        signals_that_are_true.append("RSI")
+        if sell_RSI is True:
+            signals_that_are_true.append("RSI")
+
     if pivot_resistance_1 is not None:
         sell_pivot = sell_based_on_pivot_points(price, pivot_resistance_1)
-        signals_that_are_true.append("Resistance1")
+        if sell_pivot is True:
+            signals_that_are_true.append("Resistance1")
+
     if upper_keltner_channel is not None:
         sell_kelter = sell_based_on_keltner_channel(price, upper_keltner_channel)
-        signals_that_are_true.append("Keltner")
+        if sell_kelter is True:
+            signals_that_are_true.append("Keltner")
+
     if macd_line is not None and macd_signal is not None:
         sell_macd = sell_based_on_macd(macd_line, macd_signal)
-        signals_that_are_true.append("MACD")
+        if sell_macd is True:
+            signals_that_are_true.append("MACD")
 
     if sell_RSI is True or sell_kelter is True or sell_macd is True or sell_pivot is True:
         return ([True, signals_that_are_true])

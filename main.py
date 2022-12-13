@@ -15,11 +15,22 @@ stocks_to_buy = []
 
 for data in technical_data:
     signal = buy_signal.determine_buy_signals(data['Price'], data['RSI'], data['Pivot support 1'], data['Keltner lower'], data['MACD_line'], data['MACD_signal'])
-    if signal == True:
+    if signal[0] == True:
+        data['Based on Indicators'] = signal[1]
         stocks_to_buy.append(data)
 
+# get rid of unwanted columns
+cleaned_stocks_to_buy = []
+for dict in stocks_to_buy:
+    new_dict = {}
+    new_dict['Symbol'] = dict['Symbol']
+    new_dict['Price'] = dict['Price']
+    new_dict['Signals'] = dict['Based on Indicators']
+    cleaned_stocks_to_buy.append(new_dict)
+
 buypath = general.resultsPath('Buy Signal.csv')
-general.listOfDictsToCSV(stocks_to_buy, buypath)
+general.listOfDictsToCSV(cleaned_stocks_to_buy, buypath)
+
 allpath = general.resultsPath('All Stocks.csv')
 general.listOfDictsToCSV(technical_data, allpath)
 
