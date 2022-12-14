@@ -228,7 +228,7 @@ def get_good_stock_data(stock):
                 # Quarterly income
                 earnings_info = (stock['data'].get_earnings(freq="quarterly")).to_dict()
                 good_stock['4Quarters_increasing_revenue'] = is_increasing(earnings_info['Revenue'])
-                good_stock['4Quarters_increasing_profit'] = is_increasing(earnings_info['Revenue'])
+                good_stock['4Quarters_increasing_profit'] = is_increasing(earnings_info['Earnings'])
                 # we only want 4 quarters increasing revenue
                 if is_increasing(earnings_info['Revenue']) == False:
                     return None
