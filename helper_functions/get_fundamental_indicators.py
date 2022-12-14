@@ -175,10 +175,10 @@ def get_good_stock_data(stock):
             good_stock['exchange'] = stock['exchange']
             good_stock['currentPrice'] = info['currentPrice']
             good_stock['marketCap'] = info['marketCap']
-            good_stock['heldPercentInstitutions'] = info['heldPercentInstitutions']
+            good_stock['heldPercentInstitutions'] = round((info['heldPercentInstitutions']*100),2)
 
             # Dividends
-            good_stock['dividendYield'] = info['dividendYield'] #0.0272=2.72%
+            good_stock['dividendYield'] = (info['dividendYield']*100) #0.0272=2.72%
             exDividendDate = info['exDividendDate']
             if exDividendDate is not None:
                 from datetime import datetime
@@ -187,13 +187,13 @@ def get_good_stock_data(stock):
                 good_stock['exDividendDate'] = None
 
             # EPS
-            good_stock['forwardEps'] = info['forwardEps']
-            good_stock['trailingEps'] = info['trailingEps']
+            good_stock['forwardEps'] = round(info['forwardEps'],2)
+            good_stock['trailingEps'] = round(info['trailingEps'],2)
             # P/E ratio
-            good_stock['forwardPE'] = info['forwardPE']
-            good_stock['trailingPE'] = info['trailingPE']
+            good_stock['forwardPE'] = round(info['forwardPE'],2)
+            good_stock['trailingPE'] = round(info['trailingPE'],2)
             # P/B ratio
-            good_stock['priceToBook'] = info['priceToBook']
+            good_stock['priceToBook'] = round(info['priceToBook'],2)
 
             # Assets and debt
             # for some reason they are occationally NA even if the company does have assets or debt
@@ -239,12 +239,12 @@ def get_good_stock_data(stock):
                 good_stock['4years_increasing_profit'] = is_increasing(earnings_info['Earnings'])
                 
                 # Changes last: 1 week, 1 month, 3 months, 6 months, 1 year, 5 year
-                good_stock['pct_chg_5y'] = get_stock_percentage_change(stock['data'], "5y")
-                good_stock['pct_chg_1y'] = get_stock_percentage_change(stock['data'], "1y")
-                good_stock['pct_chg_6mo'] = get_stock_percentage_change(stock['data'], "6mo")
-                good_stock['pct_chg_3mo'] = get_stock_percentage_change(stock['data'], "3mo")
-                good_stock['pct_chg_1mo'] = get_stock_percentage_change(stock['data'], "1mo")
-                good_stock['pct_chg_1wk'] = get_stock_percentage_change(stock['data'], "1wk")
+                good_stock['pct_chg_5y'] = round((get_stock_percentage_change(stock['data'], "5y")*100),2)
+                good_stock['pct_chg_1y'] = round((get_stock_percentage_change(stock['data'], "1y")*100),2)
+                good_stock['pct_chg_6mo'] = round((get_stock_percentage_change(stock['data'], "6mo")*100),2)
+                good_stock['pct_chg_3mo'] = round((get_stock_percentage_change(stock['data'], "3mo")*100),2)
+                good_stock['pct_chg_1mo'] = round((get_stock_percentage_change(stock['data'], "1mo")*100),2)
+                good_stock['pct_chg_1wk'] = round((get_stock_percentage_change(stock['data'], "1wk")*100),2)
                 
                 # Google finance link
                 url = "https://g.co/finance/"+info['symbol']+":"+stock['exchange']
