@@ -315,7 +315,8 @@ def write_symbols_to_csv(cache=False):
     # cache these results
     stock_data_path = general.dataPath("all_stock_data.pkl")
     if cache:
-        stock_data = general.fileLoadCache(stock_data_path)
+        print (stock_data_path)
+        stock_data = general.fileLoadCache(stock_data_path, datestamp=False)
     else:
         stock_data = []
 

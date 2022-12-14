@@ -7,8 +7,18 @@ NASDAQ_symbols = ['CSX', 'AMD', 'GOOGL', 'AMZN', 'DBX', 'AAPL', 'SBUX', 'MSFT', 
 NYSE_symbols = ['BAC', 'SYF', 'IBM', 'DKS', 'KR', 'UNH', 'DUK', 'TM', 'CNI', 'V', 'DE', 'FE', 'MA', 'O', 'LMT', 'WMT', 'DGX', 'WM', 'GIS', 'JPM', 'T', 'ABBV', 'JNJ', 'VALE', 'LOW', 'LEN', 'CVX', 'XOM', 'CAT', 'NKE']
 
 
-# Get fundamental analysis data
+# Get fundamental analysis symbols and data
+list_of_dicts = get_fundamental_indicators.write_symbols_to_csv(cache=True)
+for dict in list_of_dicts:
+    if dict['exchange'] == "NYSE":
+        if dict['symbol'] not in NYSE_symbols:
+            NYSE_symbols.append(dict['symbol'])
+    if dict['exchange'] == "NASDAQ":
+        if dict['symbol'] not in NASDAQ_symbols:
+            NASDAQ_symbols.append(dict['symbol'])
 
+
+    
 
 
 technical_data = []
@@ -45,9 +55,6 @@ general.listOfDictsToCSV(technical_data, allpath)
 subject = "Stock data for the day"
 body = "This is an email containing stock data sent from the Python investing bot."
 receiver_email = ""
-files = []
-files.append(buypath)
-files.append(allpath)
 
-send_email.send_email(subject=subject, body=body, receiver_email=receiver_email, files=files)
+#send_email.send_email(subject=subject, body=body, receiver_email=receiver_email, filename=buypath)
 

@@ -29,10 +29,11 @@ def buy_based_on_macd(MACD_line, MACD_signal):
     MACD_line = float(MACD_line)
     buy = False
     
-    difference = abs(MACD_line - MACD_signal)
+    difference = (MACD_line - MACD_signal)
+    
 
     # The value is set to .15 but may need to be changed, i am not sure if the values will ever actually hit 0 exactly
-    if (difference < .15) and (MACD_line < 0): 
+    if (difference >= 0 ) and (difference < .2) and (MACD_line < 0): 
         buy = True
 
     return(buy)
