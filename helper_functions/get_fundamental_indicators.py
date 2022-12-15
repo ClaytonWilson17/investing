@@ -75,7 +75,7 @@ def good_dividend(dividend):
         return False
     if dividend == "":
         return False
-    if float(dividend) > .02: #2%
+    if float(dividend) > .01: #2%
         return True
     else:
         return False
@@ -361,7 +361,7 @@ def write_symbols_to_csv(cache=False):
         stock_csv_path = general.resultsPath("all_stock_data.csv")
         general.listOfDictsToCSV(stock_data, stock_csv_path)
         # write dividend stocks to seperate file
-        # removing this code for now as our current criteria requiers a dividend of 2% or greater
+        # removing this code for now as our current criteria requiers a dividend
         # dividend_symbols = []
         # for symbol in stock_data:
         #     if good_dividend(symbol['dividendYield']):
