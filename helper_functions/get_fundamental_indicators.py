@@ -250,8 +250,13 @@ def get_good_stock_data(stock):
                 url = "https://g.co/finance/"+info['symbol']+":"+stock['exchange']
                 good_stock['fundamentals_url'] = url
                 # stockcharts link with indicators
-                url = "https://stockcharts.com/h-sc/ui?s="+info['symbol']+"&p=D&b=5&g=0&id=p69126693727"
-                good_stock['technicals_url'] = url
+                url = "https://stockcharts.com/h-sc/ui?s="+info['symbol']+"&p=D&b=5&g=0&id=p05555723250"
+                good_stock['tech_markus'] = url
+                url = "https://stockcharts.com/h-sc/ui?s="+info['symbol']+"&p=D&b=5&g=0&id=p67002332832"
+                good_stock['tech_chuck'] = url
+                url = "https://stockcharts.com/h-sc/ui?s="+info['symbol']+"&p=D&b=5&g=0&id=p65070527036"
+                good_stock['tech_custom'] = url
+
                 print(info['symbol']+" stock good")
                 return good_stock
             return None
