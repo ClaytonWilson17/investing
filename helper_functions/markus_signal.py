@@ -1,0 +1,61 @@
+# Determine if you should signal a stock (sell a put) based on technical indicators from Markus
+
+def based_on_RSI(RSI):
+    signal = None
+    if float(RSI) < float(50):    
+        signal = 'buy'
+    return (signal)
+
+
+def based_on_stochastic(stochastic):
+    signal = None
+    if float(stochastic) < float(50):
+        signal = 'buy'
+    return (signal)
+
+
+def based_on_macd(MACD_line):
+    '''
+    If the MACD line is below 0
+    '''
+    
+    MACD_line = float(MACD_line)
+    signal = None
+
+    if float(MACD_line) < float(0):
+        signal = 'buy'
+
+    return (signal)
+
+
+def determine_signals(RSI=None, stochastic=None, macd_line=None, macd_signal=None):
+
+    '''
+    All values except price are set to None by default, it will test whatever values you input to see if there is a signal signal on one of the indicators
+
+    Returns ['buy']
+    '''
+    # These variables will be set to 'buy' if the technical indicators suggest to signal
+    RSI = False
+    macd = False
+    signals_that_are_buy = []
+    
+    if RSI is not None:
+        RSI = based_on_RSI(RSI)
+        if RSI == 'buy':
+            signals_that_are_buy.append("RSI")
+
+    if stochastic is not None:
+        stoch = based_on_stochastic(stochastic=stochastic)
+        if stoch == 'buy':
+            signals_that_are_buy.append("stochastic")
+
+    if macd_line is not None:
+        macd = based_on_macd(macd_line)
+        if macd == 'buy':
+            signals_that_are_buy.append("MACD")
+
+    if RSI == 'buy' and macd == 'buy' and stoch == 'buy':
+        return (['buy', 'Markus'])
+    else:
+        return (["No Signal", "None"])

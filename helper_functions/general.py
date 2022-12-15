@@ -114,3 +114,15 @@ def fileLoadCache(filepath,datestamp=True):
         print(str(filepath)+" does not exist")
         return None
 
+
+def clean_list_of_dicts(list_of_dicts):
+    # get rid of unwanted columns
+    cleaned_stocks_to_buy = []
+    for dict in list_of_dicts:
+        new_dict = {}
+        new_dict['Symbol'] = dict['Symbol']
+        new_dict['Price'] = dict['Price']
+        new_dict['Signal'] = dict['Based on Indicators']
+        cleaned_stocks_to_buy.append(new_dict)
+
+    return (cleaned_stocks_to_buy)

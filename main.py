@@ -1,6 +1,6 @@
 # Main file which controls all of the inputs to the functions
 
-from helper_functions import custom_signal, get_technical_indicators, sell_signal, general, send_email, get_fundamental_indicators
+from helper_functions import custom_signal, get_technical_indicators, sell_signal, general, send_email, get_fundamental_indicators, markus_signal
 
 # List of stocks to get technical indicator data on
 NASDAQ_symbols = ['CSX', 'AMD', 'GOOGL', 'AMZN', 'DBX', 'AAPL', 'SBUX', 'MSFT', 'CSCO', 'TSCO', 'NVDA']
@@ -17,40 +17,54 @@ for dict in list_of_dicts:
         if dict['symbol'] not in NASDAQ_symbols:
             NASDAQ_symbols.append(dict['symbol'])
 
-
-    
-
-
+# Get technical indicators for all stocks
 technical_data = []
 technical_data =get_technical_indicators.get_tech_indicators(NYSE_symbols=NYSE_symbols, NASDAQ_symbols=NASDAQ_symbols)
 # Returns the following keys: Symbol, Price, RSI, Pivot middle, Pivot support 1, Pivot support 2, MACD_line, MACD_signal, Keltner lower, Keltner upper
 
-buy_indicators = []
-stocks_to_buy = []
 
-# Find which stocks are at a good time to sell a put
+
+
+# Find stocks based on custom signal
+stocks_to_buy = []
 for data in technical_data:
     signal = custom_signal.determine_signals(data['Price'], data['RSI'], data['Pivot support 1'], data['Keltner lower'], data['MACD_line'], data['MACD_signal'])
     if signal[0] == 'buy':
         data['Based on Indicators'] = signal[1]
         stocks_to_buy.append(data)
-
-# get rid of unwanted columns
-cleaned_stocks_to_buy = []
-for dict in stocks_to_buy:
-    new_dict = {}
-    new_dict['Symbol'] = dict['Symbol']
-    new_dict['Price'] = dict['Price']
-    new_dict['Signals'] = dict['Based on Indicators']
-    cleaned_stocks_to_buy.append(new_dict)
+custom_stocks_to_buy = general.clean_list_of_dicts(stocks_to_buy)
 
 
-buypath = general.resultsPath('Custom Signal.csv')
-if len(cleaned_stocks_to_buy) > 0:
-    general.listOfDictsToCSV(cleaned_stocks_to_buy, buypath)
+custom_path = general.resultsPath('Custom Signal.csv')
+if len(custom_stocks_to_buy) > 0:
+    general.listOfDictsToCSV(custom_stocks_to_buy, custom_path)
+
+
+
+
+# Find stocks based on Markus signal
+stocks_to_buy = []
+for data in technical_data:
+    signal = markus_signal.determine_signals(data['RSI'], data['Stochastic'], data['MACD_line'])
+    if signal[0] == 'buy':
+        data['Based on Indicators'] = signal[1]
+        stocks_to_buy.append(data)
+Markus_stocks_to_buy = general.clean_list_of_dicts(stocks_to_buy)
+
+
+Markus_path = general.resultsPath('Markus Signal.csv')
+if len(Markus_stocks_to_buy) > 0:
+    general.listOfDictsToCSV(Markus_stocks_to_buy, Markus_path)
+
+
+
+
+
+
 
 allpath = general.resultsPath('All Stocks.csv')
 general.listOfDictsToCSV(technical_data, allpath)
+
 
 
 # Email out the files
@@ -59,7 +73,7 @@ body = "This is an email containing stock data sent from the Python investing bo
 receiver_email = ""
 
 files = []
-files.append(buypath)
+files.append(custom_path)
 #files.append(allpath)
 
 #send_email.send_email(subject=subject, body=body, receiver_email=receiver_email, files=files)

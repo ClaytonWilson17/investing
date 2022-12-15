@@ -40,6 +40,7 @@ def get_tech_indicators(NYSE_symbols, NASDAQ_symbols):
         new_dict['Pivot support 2'] = output['Pivot.M.Classic.S2']
         new_dict['MACD_line'] = output['MACD.macd']
         new_dict['MACD_signal'] = output['MACD.signal']
+        new_dict['Stochastic'] = output['Stoch.D']
         try:
             new_dict['Keltner lower'] = output['KltChnl.lower']
             new_dict['Keltner upper'] = output['KltChnl.upper']
@@ -64,6 +65,7 @@ def get_tech_indicators(NYSE_symbols, NASDAQ_symbols):
         new_dict['Pivot support 2'] = output['Pivot.M.Classic.S2']
         new_dict['MACD_line'] = output['MACD.macd']
         new_dict['MACD_signal'] = output['MACD.signal']
+        new_dict['Stochastic'] = output['Stoch.D']
         try:
             new_dict['Keltner lower'] = output['KltChnl.lower']
             new_dict['Keltner upper'] = output['KltChnl.upper']
