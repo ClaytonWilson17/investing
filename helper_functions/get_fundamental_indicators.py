@@ -92,7 +92,8 @@ def good_debt_ratio(debtToAssetsRatio):
 
 def keys_not_missing(keys):
     required_keys = ['shortName', 'symbol', 'currentPrice', 'marketCap', 'forwardEps', 'trailingEps', 'forwardPE',
-     'trailingPE', 'priceToBook', 'profitMargins', 'totalRevenue', 'grossProfits', 'returnOnAssets', 'returnOnEquity', 'debtToEquity', 'sharesOutstanding', 'floatShares']
+     'trailingPE', 'priceToBook', 'profitMargins', 'totalRevenue', 'grossProfits', 'returnOnAssets', 'returnOnEquity', 
+     'debtToEquity', 'sharesOutstanding', 'floatShares']   
     if set(required_keys).issubset(set(keys)):
         return True
     else:
@@ -159,7 +160,19 @@ def get_stock_percentage_change(stock_oject, time):
     old = history['Close'][0]
     return (current-old)/old
 
-def get_good_stock_data(stock):
+def increasing_revenue(earnings_info):
+    if is_increasing(earnings_info['Revenue']):
+        return True
+    else:
+        return False
+
+def increasing_income(earnings_info):
+    if is_increasing(earnings_info['Earnings']):
+        return True
+    else:
+        return False
+
+def get_good_stock_data(stock, get_any_stock=False):
     '''
     returns dictionary(good_stock) or None
     '''
@@ -169,6 +182,7 @@ def get_good_stock_data(stock):
         if keys_not_missing(info.keys()):
             good_stock = {}
             # Basic info
+            
             good_stock['shortName'] = info['shortName']
             good_stock['industry'] = info['industry']
             good_stock['symbol'] = info['symbol']
@@ -178,14 +192,18 @@ def get_good_stock_data(stock):
             good_stock['heldPercentInstitutions'] = round((info['heldPercentInstitutions']*100),2)
 
             # Dividends
-            good_stock['dividendYield'] = (info['dividendYield']*100) #0.0272=2.72%
+            if info['dividendYield'] is not None:
+                good_stock['dividendYield'] = (info['dividendYield']*100) #0.0272=2.72%
+            else:
+                good_stock['dividendYield'] = 0
+            
             exDividendDate = info['exDividendDate']
             if exDividendDate is not None:
                 from datetime import datetime
                 good_stock['exDividendDate'] = datetime.utcfromtimestamp(int(exDividendDate)).strftime('%c')
             else:
                 good_stock['exDividendDate'] = None
-
+            
             # EPS
             good_stock['forwardEps'] = round(info['forwardEps'],2)
             good_stock['trailingEps'] = round(info['trailingEps'],2)
@@ -213,9 +231,12 @@ def get_good_stock_data(stock):
             good_stock['debtToEquity'] = info['debtToEquity']
             good_stock['sharesOutstanding'] = info['sharesOutstanding']
             good_stock['floatShares'] = info['floatShares']
-
+            
             # Only search these things if above filters are good
-            if large_cap(info['marketCap']) and good_instutional_ownership(info['heldPercentInstitutions']) and affordable_price(info['currentPrice']) and good_pb_ratio(info['priceToBook']) and good_pe_ratio(info['forwardPE']) and good_debt_ratio(good_stock['debtToAssetsRatio']):
+            great_stock = False
+            if (large_cap(info['marketCap']) and good_dividend(info['dividendYield']) and good_instutional_ownership(info['heldPercentInstitutions']) and affordable_price(info['currentPrice']) and good_pb_ratio(info['priceToBook']) and good_pe_ratio(info['forwardPE'])):
+                great_stock = True
+            if get_any_stock or great_stock:
                 # next earnings date
                 # for some reason, the data is not well formatted. 0 or "Value" as keys
                 earnings_object = (stock['data'].calendar).to_dict()
@@ -225,18 +246,18 @@ def get_good_stock_data(stock):
                     nextEarningsDate = (stock['data'].calendar).to_dict()['Value']['Earnings Date']
                 good_stock['nextEarningsDate'] = nextEarningsDate
 
-                # Quarterly income
-                earnings_info = (stock['data'].get_earnings(freq="quarterly")).to_dict()
-                good_stock['4Quarters_increasing_revenue'] = is_increasing(earnings_info['Revenue'])
-                good_stock['4Quarters_increasing_profit'] = is_increasing(earnings_info['Earnings'])
-                # we only want 4 quarters increasing revenue
-                if is_increasing(earnings_info['Revenue']) == False:
-                    return None
+                # Quarterly/Yearly income
+                quarterly_earnings_info = (stock['data'].get_earnings(freq="quarterly")).to_dict()
+                yearly_earnings_info = (stock['data'].get_earnings(freq="yearly")).to_dict()
+                good_stock['4Quarters_increasing_revenue'] = increasing_revenue(quarterly_earnings_info)
+                good_stock['4Quarters_increasing_profit'] = increasing_income(quarterly_earnings_info)
+                good_stock['4years_increasing_revenue'] = increasing_revenue(yearly_earnings_info)
+                good_stock['4years_increasing_profit'] = increasing_income(yearly_earnings_info)
 
-                # Yearly income
-                earnings_info = (stock['data'].get_earnings(freq="yearly")).to_dict()
-                good_stock['4years_increasing_revenue'] = is_increasing(earnings_info['Revenue'])
-                good_stock['4years_increasing_profit'] = is_increasing(earnings_info['Earnings'])
+                # we only want 4 quarters increasing revenue or last 4 years increasing revenue/income
+                if (get_any_stock == False) and (good_stock['4Quarters_increasing_revenue'] or (good_stock['4years_increasing_revenue'] and good_stock['4years_increasing_profit'])):
+                    print("Bad income")
+                    return None
                 
                 # Changes last: 1 week, 1 month, 3 months, 6 months, 1 year, 5 year
                 good_stock['pct_chg_5y'] = round((get_stock_percentage_change(stock['data'], "5y")*100),2)
@@ -256,8 +277,10 @@ def get_good_stock_data(stock):
                 good_stock['tech_chuck'] = url
                 url = "https://stockcharts.com/h-sc/ui?s="+info['symbol']+"&p=D&b=5&g=0&id=p65070527036"
                 good_stock['tech_custom'] = url
-
-                print(info['symbol']+" stock good")
+                if great_stock:
+                    print(info['symbol']+" stock good")
+                else:
+                    print("This was a bad stock but returning results anyway")
                 return good_stock
             return None
     except:
@@ -285,7 +308,7 @@ def clean_for_csv(good_stocks):
 # AVGO stock good
 # BIDU stock good
 # BIIB stock good
-def write_symbol_to_csv(symbol, exchange, cache=False):
+def write_symbol_to_csv(symbol, exchange, cache=False, get_any_stock=False):
     ''''''
     start_time = time.time()
     stock = get_symbol_object(symbol, exchange)
@@ -297,7 +320,7 @@ def write_symbol_to_csv(symbol, exchange, cache=False):
         stock_data = []
 
     if stock_data == []:
-        good_stock = get_good_stock_data(stock)
+        good_stock = get_good_stock_data(stock, get_any_stock=get_any_stock)
         if good_stock is not None:
             stock_data.append(good_stock)
         general.fileSaveCache(stock_data_path, stock_data)
@@ -338,15 +361,16 @@ def write_symbols_to_csv(cache=False):
         stock_csv_path = general.resultsPath("all_stock_data.csv")
         general.listOfDictsToCSV(stock_data, stock_csv_path)
         # write dividend stocks to seperate file
-        dividend_symbols = []
-        for symbol in stock_data:
-            if good_dividend(symbol['dividendYield']):
-                dividend_symbols.append(symbol)
-        if dividend_symbols != []:
-            stock_csv_path = general.resultsPath("dividend_stock_data.csv")
-            general.listOfDictsToCSV(dividend_symbols, stock_csv_path)
-        else:
-            print("No dividend stocks found")
+        # removing this code for now as our current criteria requiers a dividend of 2% or greater
+        # dividend_symbols = []
+        # for symbol in stock_data:
+        #     if good_dividend(symbol['dividendYield']):
+        #         dividend_symbols.append(symbol)
+        # if dividend_symbols != []:
+        #     stock_csv_path = general.resultsPath("dividend_stock_data.csv")
+        #     general.listOfDictsToCSV(dividend_symbols, stock_csv_path)
+        # else:
+        #     print("No dividend stocks found")
     else:
         print("No good stocks found")
     return stock_data
