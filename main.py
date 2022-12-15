@@ -1,6 +1,6 @@
 # Main file which controls all of the inputs to the functions
 
-from helper_functions import get_technical_indicators, sell_signal, buy_signal, general, send_email, get_fundamental_indicators
+from helper_functions import custom_signal, get_technical_indicators, sell_signal, general, send_email, get_fundamental_indicators
 
 # List of stocks to get technical indicator data on
 NASDAQ_symbols = ['CSX', 'AMD', 'GOOGL', 'AMZN', 'DBX', 'AAPL', 'SBUX', 'MSFT', 'CSCO', 'TSCO', 'NVDA']
@@ -30,7 +30,7 @@ stocks_to_buy = []
 
 # Find which stocks are at a good time to sell a put
 for data in technical_data:
-    signal = buy_signal.determine_buy_signals(data['Price'], data['RSI'], data['Pivot support 1'], data['Keltner lower'], data['MACD_line'], data['MACD_signal'])
+    signal = custom_signal.determine_buy_signals(data['Price'], data['RSI'], data['Pivot support 1'], data['Keltner lower'], data['MACD_line'], data['MACD_signal'])
     if signal[0] == True:
         data['Based on Indicators'] = signal[1]
         stocks_to_buy.append(data)
