@@ -76,4 +76,4 @@ def determine_signals(price, RSI=None, pivot_support_1=None, lower_keltner_chann
     if RSI == 'buy' and kelter == 'buy' and macd == 'buy' and pivot == 'buy':
         return (['buy', signals_that_are_buy])
     else:
-        return ([None, ""])
+        return (["No Signal", "None"])

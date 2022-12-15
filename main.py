@@ -30,8 +30,8 @@ stocks_to_buy = []
 
 # Find which stocks are at a good time to sell a put
 for data in technical_data:
-    signal = custom_signal.determine_buy_signals(data['Price'], data['RSI'], data['Pivot support 1'], data['Keltner lower'], data['MACD_line'], data['MACD_signal'])
-    if signal[0] == True:
+    signal = custom_signal.determine_signals(data['Price'], data['RSI'], data['Pivot support 1'], data['Keltner lower'], data['MACD_line'], data['MACD_signal'])
+    if signal[0] == 'buy':
         data['Based on Indicators'] = signal[1]
         stocks_to_buy.append(data)
 
@@ -44,8 +44,10 @@ for dict in stocks_to_buy:
     new_dict['Signals'] = dict['Based on Indicators']
     cleaned_stocks_to_buy.append(new_dict)
 
-buypath = general.resultsPath('Buy Signal.csv')
-general.listOfDictsToCSV(cleaned_stocks_to_buy, buypath)
+
+buypath = general.resultsPath('Custom Signal.csv')
+if len(cleaned_stocks_to_buy) > 0:
+    general.listOfDictsToCSV(cleaned_stocks_to_buy, buypath)
 
 allpath = general.resultsPath('All Stocks.csv')
 general.listOfDictsToCSV(technical_data, allpath)
