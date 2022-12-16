@@ -256,7 +256,7 @@ def get_good_stock_data(stock, get_any_stock=False):
 
                 # we only want 4 quarters increasing revenue or last 4 years increasing revenue/income
                 if (get_any_stock == False) and (good_stock['4Quarters_increasing_revenue'] or (good_stock['4years_increasing_revenue'] and good_stock['4years_increasing_profit'])):
-                    print("Bad income")
+                    print(good_stock['symbol']+" is a good stock but has a bad income report. Skipping...")
                     return None
                 
                 # Changes last: 1 week, 1 month, 3 months, 6 months, 1 year, 5 year
@@ -275,8 +275,6 @@ def get_good_stock_data(stock, get_any_stock=False):
                 good_stock['tech_markus'] = url
                 url = "https://stockcharts.com/h-sc/ui?s="+info['symbol']+"&p=D&b=5&g=0&id=p67002332832"
                 good_stock['tech_chuck'] = url
-                url = "https://stockcharts.com/h-sc/ui?s="+info['symbol']+"&p=D&b=5&g=0&id=p65070527036"
-                good_stock['tech_custom'] = url
                 if great_stock:
                     print(info['symbol']+" stock good")
                 else:
@@ -349,6 +347,7 @@ def write_symbols_to_csv(cache=False):
 
     if stock_data is None:
         print("Starting download of stock data... this should take about 4-6 hours.")
+        stock_data = []
         for stock in stocks:
             good_stock = get_good_stock_data(stock)
             if good_stock is not None:
