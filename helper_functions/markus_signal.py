@@ -1,16 +1,18 @@
 # Determine if you should signal a stock (sell a put) based on technical indicators from Markus
 
-def based_on_RSI(RSI):
+def based_on_RSI(RSI, past_RSI):
     signal = None
-    if float(RSI) < float(50):    
-        signal = 'buy'
+    if float(RSI) < float(50):
+        if float(RSI) < float(past_RSI):   
+            signal = 'buy'
     return (signal)
 
 
-def based_on_stochastic(stochastic):
+def based_on_stochastic(stochastic, past_stochastic):
     signal = None
     if float(stochastic) < float(50):
-        signal = 'buy'
+        if float(stochastic) < float(past_stochastic):
+            signal = 'buy'
     return (signal)
 
 
@@ -28,7 +30,7 @@ def based_on_macd(MACD_line):
     return (signal)
 
 
-def determine_signals(RSI=None, stochastic=None, macd_line=None, macd_signal=None):
+def determine_signals(RSI=None, past_RSI=None, stochastic=None, past_stochastic=None, macd_line=None):
 
     '''
     All values except price are set to None by default, it will test whatever values you input to see if there is a signal signal on one of the indicators
@@ -41,12 +43,12 @@ def determine_signals(RSI=None, stochastic=None, macd_line=None, macd_signal=Non
     signals_that_are_buy = []
     
     if RSI is not None:
-        RSI = based_on_RSI(RSI)
+        RSI = based_on_RSI(RSI, past_RSI=past_RSI)
         if RSI == 'buy':
             signals_that_are_buy.append("RSI")
 
     if stochastic is not None:
-        stoch = based_on_stochastic(stochastic=stochastic)
+        stoch = based_on_stochastic(stochastic=stochastic, past_stochastic=past_stochastic)
         if stoch == 'buy':
             signals_that_are_buy.append("stochastic")
 

@@ -41,9 +41,10 @@ def send_email(subject, body, receiver_email, files):
         encoders.encode_base64(part)
 
         # Add header as key/value pair to attachment part
+        name = os.path.basename(filename)
         part.add_header(
             "Content-Disposition",
-            f"attachment; filename= {filename}",
+            f"attachment; filename= {name}",
         )
 
         # Add attachment to message and convert message to string

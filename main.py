@@ -22,6 +22,12 @@ technical_data = []
 technical_data =get_technical_indicators.get_tech_indicators(NYSE_symbols=NYSE_symbols, NASDAQ_symbols=NASDAQ_symbols)
 # Returns the following keys: Symbol, Price, RSI, Pivot middle, Pivot support 1, Pivot support 2, MACD_line, MACD_signal, Keltner lower, Keltner upper
 
+# Store indicators to be used as a reference in the future:
+data_path = general.dataPath("historical_indicators.pkl")
+general.fileSaveCache(data_path, technical_data, datestamp=True)
+
+historical_indicators = general.fileLoadCache(data_path)
+
 
 
 
@@ -45,10 +51,12 @@ if len(custom_stocks_to_buy) > 0:
 # Find stocks based on Markus signal
 stocks_to_buy = []
 for data in technical_data:
-    signal = markus_signal.determine_signals(data['RSI'], data['Stochastic'], data['MACD_line'])
-    if signal[0] == 'buy':
-        data['Based on Indicators'] = signal[1]
-        stocks_to_buy.append(data)
+    past_data = general.get_historical_indicators(sym=data['Symbol'], days_ago=1)
+    if past_data != 'no data':
+        signal = markus_signal.determine_signals(RSI=data['RSI'], past_RSI=past_data['RSI'], stochastic=data['Stochastic'], past_stochastic=past_data['Stochastic'] ,macd_line=data['MACD_line'])
+        if signal[0] == 'buy':
+            data['Based on Indicators'] = signal[1]
+            stocks_to_buy.append(data)
 Markus_stocks_to_buy = general.clean_list_of_dicts(stocks_to_buy)
 
 

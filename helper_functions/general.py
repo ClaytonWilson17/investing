@@ -2,7 +2,7 @@ import os
 import sys
 import csv
 import pickle
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 
 def get_git_root(path=os.getcwd()):
     
@@ -126,3 +126,24 @@ def clean_list_of_dicts(list_of_dicts):
         cleaned_stocks_to_buy.append(new_dict)
 
     return (cleaned_stocks_to_buy)
+
+
+def get_historical_indicators(sym, days_ago):
+    today = datetime.now() 
+    past_date = today - timedelta(days=days_ago)
+    past_date = past_date.strftime('%Y-%m-%d')
+    data_path = dataPath("historical_indicators" + str(past_date) + ".pkl")
+    data = fileLoadCache(data_path, datestamp=False)
+    if data is None:
+        print ("There is no past indicator data so the Markus/Chuck signal will not work")
+        return 'no data'
+
+    historical_data = None
+    for d in data:
+        if sym == d['Symbol']:
+            historical_data = d
+    
+    if historical_data is None:
+        historical_data = 'no data'
+
+    return historical_data
