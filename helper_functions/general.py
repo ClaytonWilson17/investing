@@ -122,7 +122,9 @@ def clean_list_of_dicts(list_of_dicts):
         new_dict = {}
         new_dict['Symbol'] = dict['Symbol']
         new_dict['Price'] = dict['Price']
-        new_dict['Signal'] = dict['Based on Indicators']
+        new_dict['Based on Indicators'] = dict['Based on Indicators']
+        new_dict['Signal'] = dict['Signal']
+
         cleaned_stocks_to_buy.append(new_dict)
 
     return (cleaned_stocks_to_buy)

@@ -49,7 +49,7 @@ def determine_signals(price, RSI=None, pivot_support_1=None, lower_keltner_chann
     # These variables will be set to 'buy' if the technical indicators suggest to signal
     RSI = False
     pivot = False
-    kelter = False
+    keltner = False
     macd = False
     signals_that_are_buy = []
     
@@ -64,8 +64,8 @@ def determine_signals(price, RSI=None, pivot_support_1=None, lower_keltner_chann
             signals_that_are_buy.append("Support1")
 
     if lower_keltner_channel is not None:
-        kelter = based_on_keltner_channel(price, lower_keltner_channel)
-        if kelter == 'buy':
+        keltner = based_on_keltner_channel(price, lower_keltner_channel)
+        if keltner == 'buy':
             signals_that_are_buy.append("Keltner")
 
     if macd_line is not None and macd_signal is not None:
@@ -73,7 +73,7 @@ def determine_signals(price, RSI=None, pivot_support_1=None, lower_keltner_chann
         if macd == 'buy':
             signals_that_are_buy.append("MACD")
 
-    if RSI == 'buy' and kelter == 'buy' and macd == 'buy' and pivot == 'buy':
-        return (['buy', 'Custom'])
+    if RSI == 'buy' and keltner == 'buy' and pivot == 'buy':
+        return (['buy', signals_that_are_buy])
     else:
         return (["No Signal", "None"])

@@ -2,35 +2,36 @@
 
 def based_on_RSI(RSI, past_RSI):
     signal = None
-    if float(RSI) < float(50):
-        if float(RSI) < float(past_RSI):   
+    if float(RSI) > float(50):
+        if float(RSI) > float(past_RSI):   
             signal = 'buy'
     return (signal)
 
 
 def based_on_stochastic(stochastic, past_stochastic):
     signal = None
-    if float(stochastic) < float(50):
-        if float(stochastic) < float(past_stochastic):
+    if float(stochastic) > float(50):
+        if float(stochastic) > float(past_stochastic):
             signal = 'buy'
     return (signal)
 
 
-def based_on_macd(MACD_line):
+def based_on_macd(MACD_line, signal_line):
     '''
-    If the MACD line is below 0
+    If the MACD line is greater than the signal line (market in uptrend)
     '''
     
     MACD_line = float(MACD_line)
+    signal_line = float(signal_line)
     signal = None
 
-    if float(MACD_line) < float(0):
+    if MACD_line > signal_line:
         signal = 'buy'
 
     return (signal)
 
 
-def determine_signals(RSI=None, past_RSI=None, stochastic=None, past_stochastic=None, macd_line=None):
+def determine_signals(RSI=None, past_RSI=None, stochastic=None, past_stochastic=None, macd_line=None, macd_signal=None):
 
     '''
     All values except price are set to None by default, it will test whatever values you input to see if there is a signal signal on one of the indicators
@@ -52,12 +53,12 @@ def determine_signals(RSI=None, past_RSI=None, stochastic=None, past_stochastic=
         if stoch == 'buy':
             signals_that_are_buy.append("stochastic")
 
-    if macd_line is not None:
-        macd = based_on_macd(macd_line)
+    if macd_line is not None and macd_signal is not None:
+        macd = based_on_macd(macd_line, macd_signal)
         if macd == 'buy':
             signals_that_are_buy.append("MACD")
 
-    if RSI == 'buy' and macd == 'buy' and stoch == 'buy':
-        return (['buy', 'Markus'])
+    if RSI == 'buy' or macd == 'buy' or stoch == 'buy':
+        return (['buy', signals_that_are_buy])
     else:
         return (["No Signal", "None"])
