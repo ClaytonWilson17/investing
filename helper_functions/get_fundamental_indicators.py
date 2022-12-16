@@ -8,6 +8,7 @@ import os
 import json
 import requests
 import time
+from datetime import date, datetime, timedelta
 import pandas as pd
 import yfinance as yf #https://github.com/ranaroussi/yfinance
 from datetime import datetime
@@ -342,7 +343,7 @@ def write_symbols_to_csv(cache=False):
     # cache these results
     stock_data_path = general.dataPath("all_stock_data.pkl")
     if cache:
-        stock_data = general.fileLoadCache(stock_data_path, datestamp=False)
+        stock_data = general.fileLoadCache(stock_data_path)
     else:
         stock_data = None
 
@@ -375,3 +376,25 @@ def write_symbols_to_csv(cache=False):
         print("No good stocks found")
     return stock_data
 
+
+def get_delta():
+    filename = "all_stock_data"
+    one_day = timedelta(days=1)
+    yesterday = filename+str(date.today()-one_day)+".pkl"
+    today = filename+str(date.today())+".pkl"
+    yesterday_path = general.dataPath(yesterday)
+    today_path = general.dataPath(today)
+    yesterday_stocks = general.fileLoadCache(yesterday_path, datestamp=False)
+    today_stocks = general.fileLoadCache(today_path, datestamp=False)
+
+    today_symbols = [stock['symbol'] for stock in today_stocks]
+    yesterday_symbols = [stock['symbol'] for stock in yesterday_stocks]
+    removed_stocks = [d['symbol'] for d in yesterday_stocks if d['symbol'] not in today_symbols]
+    added_stocks = [d['symbol'] for d in today_stocks if d['symbol'] not in yesterday_symbols]
+    
+    yesterday_csv = general.resultsPath("yesterday_stocks.csv")
+    today_csv = general.resultsPath("today_stocks.csv")
+    general.listOfDictsToCSV(yesterday_stocks, yesterday_csv)
+    general.listOfDictsToCSV(today_stocks, today_csv)
+
+    return {"added": added_stocks, "removed": removed_stocks}
