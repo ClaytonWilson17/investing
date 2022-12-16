@@ -317,9 +317,9 @@ def write_symbol_to_csv(symbol, exchange, cache=False, get_any_stock=False):
     if cache:
         stock_data = general.fileLoadCache(stock_data_path)
     else:
-        stock_data = []
+        stock_data = None
 
-    if stock_data == []:
+    if stock_data is None:
         good_stock = get_good_stock_data(stock, get_any_stock=get_any_stock)
         if good_stock is not None:
             stock_data.append(good_stock)
@@ -343,12 +343,12 @@ def write_symbols_to_csv(cache=False):
     # cache these results
     stock_data_path = general.dataPath("all_stock_data.pkl")
     if cache:
-        print (stock_data_path)
         stock_data = general.fileLoadCache(stock_data_path, datestamp=False)
     else:
-        stock_data = []
+        stock_data = None
 
-    if stock_data == []:
+    if stock_data is None:
+        print("Starting download of stock data... this should take about 4-6 hours.")
         for stock in stocks:
             good_stock = get_good_stock_data(stock)
             if good_stock is not None:
