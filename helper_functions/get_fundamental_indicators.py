@@ -255,7 +255,7 @@ def get_good_stock_data(stock, get_any_stock=False):
                 good_stock['4years_increasing_profit'] = increasing_income(yearly_earnings_info)
 
                 # we only want 4 quarters increasing revenue or last 4 years increasing revenue/income
-                if (get_any_stock == False) and (good_stock['4Quarters_increasing_revenue'] or (good_stock['4years_increasing_revenue'] and good_stock['4years_increasing_profit'])):
+                if (get_any_stock == False) and not (good_stock['4Quarters_increasing_revenue'] or (good_stock['4years_increasing_revenue'] and good_stock['4years_increasing_profit'])):
                     print(good_stock['symbol']+" is a good stock but has a bad income report. Skipping...")
                     return None
                 
@@ -318,6 +318,7 @@ def write_symbol_to_csv(symbol, exchange, cache=False, get_any_stock=False):
         stock_data = None
 
     if stock_data is None:
+        stock_data = []
         good_stock = get_good_stock_data(stock, get_any_stock=get_any_stock)
         if good_stock is not None:
             stock_data.append(good_stock)
