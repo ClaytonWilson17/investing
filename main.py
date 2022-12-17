@@ -112,14 +112,15 @@ if len(markus_stocks_to_sell) > 0:
 #allpath = general.resultsPath('All Stocks.csv')
 #general.listOfDictsToCSV(technical_data, allpath)
 
-
+all_stock_data = general.resultsPath('all_stock_data.csv')
+files.append(all_stock_data)
 
 # Email out the files
 general.get_env_vars()
 subject = "Stock signals for the day"
 body = "Hello humans, please see the attached csv files for the current buy and sell signals for the day...  buy (sell a put)  sell (sell a call)"
 receiver_emails = []
-receiver_emails.append(os.environ['simon_email'])
+#receiver_emails.append(os.environ['simon_email'])
 receiver_emails.append(os.environ['clayton_email'])
 
 for reciever in receiver_emails:
