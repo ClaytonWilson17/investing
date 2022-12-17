@@ -120,7 +120,7 @@ general.get_env_vars()
 subject = "Stock signals for the day"
 body = "Hello humans, please see the attached csv files for the current buy and sell signals for the day...  buy (sell a put)  sell (sell a call)"
 receiver_emails = []
-#receiver_emails.append(os.environ['simon_email'])
+receiver_emails.append(os.environ['simon_email'])
 receiver_emails.append(os.environ['clayton_email'])
 
 for reciever in receiver_emails:
