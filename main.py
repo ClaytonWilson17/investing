@@ -121,7 +121,9 @@ fundamental_delta = get_fundamental_indicators.get_delta()
 # Email out the files
 general.get_env_vars()
 subject = "Stock signals for the day"
-body = "Hello humans,\n\nPlease see the all_stock_data.csv file for information on fundamental analysis of all stocks. \nIf there are any stocks that received a buy or sell signal, they will show up in separate csv files.\n\nThanks,\nInvesting Bot"
+body ="""Hello humans,\n\nPlease see the all_stock_data.csv file for information on fundamental analysis of all stocks.
+     \nIf there are any stocks that received a buy or sell signal, they will show up in separate csv files.\n\nThanks,\nInvesting Bot
+     \n\n here are the stocks that have been added and removed due based on fundamental requirements:\n """ + str(fundamental_delta)
 receiver_emails = []
 #receiver_emails.append(os.environ['simon_email'])
 receiver_emails.append(os.environ['clayton_email'])
