@@ -201,7 +201,6 @@ def get_good_stock_data(stock, get_any_stock=False):
             good_stock['exchange'] = stock['exchange']
             good_stock['currentPrice'] = info['currentPrice']
             good_stock['marketCap'] = info['marketCap']
-            logger.debug("Getting held instituts")
             good_stock['heldPercentInstitutions'] = round((info['heldPercentInstitutions']*100),2)
 
             # Dividends
@@ -215,15 +214,12 @@ def get_good_stock_data(stock, get_any_stock=False):
                 good_stock['exDividendDate'] = None
             
             # EPS
-            logger.debug("rounding EPS")
             good_stock['forwardEps'] = round(info['forwardEps'],2)
             good_stock['trailingEps'] = round(info['trailingEps'],2)
             # P/E ratio
-            logger.debug("rounding PE")
             good_stock['forwardPE'] = round(info['forwardPE'],2)
             good_stock['trailingPE'] = round(info['trailingPE'],2)
             # P/B ratio
-            logger.debug("rounding P/B ratio")
             good_stock['priceToBook'] = round(info['priceToBook'],2)
 
             # Assets and debt
@@ -274,7 +270,6 @@ def get_good_stock_data(stock, get_any_stock=False):
                     return None
                 
                 # Changes last: 1 week, 1 month, 3 months, 6 months, 1 year, 5 year
-                logger.debug("rounding percentage stock change")
                 good_stock['pct_chg_5y'] = round((get_stock_percentage_change(stock['data'], "5y")*100),2)
                 good_stock['pct_chg_1y'] = round((get_stock_percentage_change(stock['data'], "1y")*100),2)
                 good_stock['pct_chg_6mo'] = round((get_stock_percentage_change(stock['data'], "6mo")*100),2)
