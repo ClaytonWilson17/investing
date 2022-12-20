@@ -13,6 +13,8 @@ import pandas as pd
 import yfinance as yf #https://github.com/ranaroussi/yfinance
 from datetime import datetime
 
+logger = general.getCustomLogger("log.txt")
+
 def get_all_symbols():
     general.get_env_vars()
 
@@ -27,6 +29,7 @@ def get_all_symbols():
 
     ## 'Code', 'Name', and 'Exchange' are the useful variables
     print("There are a total of: "+str(len(symbols))+" symbols")
+    logger.debug("There are a total of: "+str(len(symbols))+" symbols")
     return symbols
 
 # this downloads symbol data for the past:
@@ -258,6 +261,7 @@ def get_good_stock_data(stock, get_any_stock=False):
                 # we only want 4 quarters increasing revenue or last 4 years increasing revenue/income
                 if (get_any_stock == False) and not (good_stock['4Quarters_increasing_revenue'] or (good_stock['4years_increasing_revenue'] and good_stock['4years_increasing_profit'])):
                     print(good_stock['symbol']+" is a good stock but has a bad income report. Skipping...")
+                    logger.debug(good_stock['symbol']+" is a good stock but has a bad income report. Skipping...")
                     return None
                 
                 # Changes last: 1 week, 1 month, 3 months, 6 months, 1 year, 5 year
@@ -276,12 +280,15 @@ def get_good_stock_data(stock, get_any_stock=False):
                 good_stock['tech_markus'] = url
                 if great_stock:
                     print(info['symbol']+" stock good")
+                    logger.debug(info['symbol']+" stock good")
                 else:
                     print("This was a bad stock but returning results anyway")
+                    logger.debug("This was a bad stock but returning results anyway")
                 return good_stock
             return None
     except Exception as e:
         print(e)
+        logger.debug(e)
         return None
 
 def clean_for_csv(good_stocks):
@@ -324,6 +331,7 @@ def write_symbol_to_csv(symbol, exchange, cache=False, get_any_stock=False):
             stock_data.append(good_stock)
         general.fileSaveCache(stock_data_path, stock_data)
         print("--- %s seconds to get all stock data  ---" % (round(time.time() - start_time,2)))
+        logger.debug("--- %s seconds to get all stock data  ---" % (round(time.time() - start_time,2)))
     # write to CSV
     if stock_data != []:
         stock_data = clean_for_csv(stock_data)
@@ -331,6 +339,7 @@ def write_symbol_to_csv(symbol, exchange, cache=False, get_any_stock=False):
         general.listOfDictsToCSV(stock_data, stock_csv_path)
     else:
         print(symbol+" is not a good stock")
+        logger.debug(symbol+" is not a good stock")
     return stock_data
 
 # 118m to get through NASDAQ
@@ -348,6 +357,7 @@ def write_symbols_to_csv(cache=False):
 
     if stock_data is None:
         print("Starting download of stock data... this should take about 4-6 hours.")
+        logger.debug("Starting download of stock data... this should take about 4-6 hours.")
         stock_data = []
         for stock in stocks:
             good_stock = get_good_stock_data(stock)
@@ -355,6 +365,7 @@ def write_symbols_to_csv(cache=False):
                 stock_data.append(good_stock)
         general.fileSaveCache(stock_data_path, stock_data)
         print("--- %s seconds to get all stock data  ---" % (round(time.time() - start_time,2)))
+        logger.debug("--- %s seconds to get all stock data  ---" % (round(time.time() - start_time,2)))
     # write to CSV
     if stock_data != []:
         stock_data = clean_for_csv(stock_data)
@@ -373,6 +384,7 @@ def write_symbols_to_csv(cache=False):
         #     print("No dividend stocks found")
     else:
         print("No good stocks found")
+        logger.debug("No good stocks found")
     return stock_data
 
 
