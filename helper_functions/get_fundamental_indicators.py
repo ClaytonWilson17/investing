@@ -274,15 +274,14 @@ def get_good_stock_data(stock, get_any_stock=False):
                 # stockcharts link with indicators
                 url = "https://stockcharts.com/h-sc/ui?s="+info['symbol']+"&p=D&b=5&g=0&id=p05555723250"
                 good_stock['tech_markus'] = url
-                url = "https://stockcharts.com/h-sc/ui?s="+info['symbol']+"&p=D&b=5&g=0&id=p67002332832"
-                good_stock['tech_chuck'] = url
                 if great_stock:
                     print(info['symbol']+" stock good")
                 else:
                     print("This was a bad stock but returning results anyway")
                 return good_stock
             return None
-    except:
+    except Exception as e:
+        print(e)
         return None
 
 def clean_for_csv(good_stocks):
