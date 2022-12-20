@@ -176,6 +176,12 @@ def increasing_income(earnings_info):
     else:
         return False
 
+def replace_none_values(object, list_of_keys):
+    for key in list_of_keys:
+        if object[key] is None:
+            object[key] = 0
+    return object
+
 def get_good_stock_data(stock, get_any_stock=False):
     '''
     returns dictionary(good_stock) or None
@@ -184,22 +190,22 @@ def get_good_stock_data(stock, get_any_stock=False):
     try:
         info = stock['data'].info
         if keys_not_missing(info.keys()):
+            # go through each of the following keys
+            info = replace_none_values(info, ['heldPercentInstitutions', 'dividendYield', 'forwardEps', 'trailingEps', 'forwardPE', 'trailingPE', 'priceToBook'])
+
             good_stock = {}
             # Basic info
-            
             good_stock['shortName'] = info['shortName']
             good_stock['industry'] = info['industry']
             good_stock['symbol'] = info['symbol']
             good_stock['exchange'] = stock['exchange']
             good_stock['currentPrice'] = info['currentPrice']
             good_stock['marketCap'] = info['marketCap']
+            logger.debug("Getting held instituts")
             good_stock['heldPercentInstitutions'] = round((info['heldPercentInstitutions']*100),2)
 
             # Dividends
-            if info['dividendYield'] is not None:
-                good_stock['dividendYield'] = (info['dividendYield']*100) #0.0272=2.72%
-            else:
-                good_stock['dividendYield'] = 0
+            good_stock['dividendYield'] = (info['dividendYield']*100) #0.0272=2.72%
             
             exDividendDate = info['exDividendDate']
             if exDividendDate is not None:
@@ -209,22 +215,25 @@ def get_good_stock_data(stock, get_any_stock=False):
                 good_stock['exDividendDate'] = None
             
             # EPS
+            logger.debug("rounding EPS")
             good_stock['forwardEps'] = round(info['forwardEps'],2)
             good_stock['trailingEps'] = round(info['trailingEps'],2)
             # P/E ratio
+            logger.debug("rounding PE")
             good_stock['forwardPE'] = round(info['forwardPE'],2)
             good_stock['trailingPE'] = round(info['trailingPE'],2)
             # P/B ratio
+            logger.debug("rounding P/B ratio")
             good_stock['priceToBook'] = round(info['priceToBook'],2)
 
             # Assets and debt
             # for some reason they are occationally NA even if the company does have assets or debt
-            totalAssets = info.get('totalAssets')
-            totalDebt = info.get('totalDebt')
-            if totalAssets is None or totalDebt is None:
-                good_stock['debtToAssetsRatio'] = 0
-            else:
-                good_stock['debtToAssetsRatio'] = totalDebt/totalAssets
+            # totalAssets = info.get('totalAssets')
+            # totalDebt = info.get('totalDebt')
+            # if totalAssets is None or totalDebt is None:
+            #     good_stock['debtToAssetsRatio'] = 0
+            # else:
+            #     good_stock['debtToAssetsRatio'] = totalDebt/totalAssets
 
             # profit info
             good_stock['profitMargins'] = info['profitMargins']
@@ -265,6 +274,7 @@ def get_good_stock_data(stock, get_any_stock=False):
                     return None
                 
                 # Changes last: 1 week, 1 month, 3 months, 6 months, 1 year, 5 year
+                logger.debug("rounding percentage stock change")
                 good_stock['pct_chg_5y'] = round((get_stock_percentage_change(stock['data'], "5y")*100),2)
                 good_stock['pct_chg_1y'] = round((get_stock_percentage_change(stock['data'], "1y")*100),2)
                 good_stock['pct_chg_6mo'] = round((get_stock_percentage_change(stock['data'], "6mo")*100),2)
