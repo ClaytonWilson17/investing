@@ -107,8 +107,6 @@ if len(markus_stocks_to_sell) > 0:
     files.append(markus_sell_path)
     general.listOfDictsToCSV(markus_stocks_to_sell, markus_sell_path)
 
-
-
 #allpath = general.resultsPath('All Stocks.csv')
 #general.listOfDictsToCSV(technical_data, allpath)
 
@@ -118,7 +116,13 @@ files.append(all_stock_data)
 # Email out the files
 general.get_env_vars()
 subject = "Stock signals for the day"
-body = "Hello humans, please see the attached csv files for the current buy and sell signals for the day...  buy (sell a put)  sell (sell a call)"
+# Get which stocks were added or removed from our list of good stocks
+deltas = get_fundamental_indicators.get_delta()
+body = """Hello humans, please see the attached csv files for the current buy and sell signals for the day...  buy (sell a put)  sell (sell a call)\n\n
+        We analyze stocks every day. We monitor their changes. If a stock is removed, you should probably stop investing in it because it no longer meets our criteria.\n"""
+body = body + "Added stocks: "+','.join(deltas['added'])+"\n"
+body = body + "Removed stocks: "+','.join(deltas['removed'])+"\n"
+
 receiver_emails = []
 receiver_emails.append(os.environ['simon_email'])
 receiver_emails.append(os.environ['clayton_email'])
