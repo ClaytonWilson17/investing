@@ -2,6 +2,7 @@
 
 from helper_functions import custom_signal, get_technical_indicators, sell_signal, general, send_email, get_fundamental_indicators, markus_signal
 import os
+from datetime import datetime
 logger = general.getCustomLogger("log.txt")
 
 # List of stocks to get technical indicator data on
@@ -126,7 +127,7 @@ fundamental_delta = get_fundamental_indicators.get_delta()
 
 # Email out the files
 general.get_env_vars()
-subject = "Stock signals for the day"
+subject = "Stock signals for the day " + str(datetime.today().strftime('%Y-%m-%d'))
 
 # Get which stocks were added or removed from our list of good stocks
 print("Get which stocks were added or removed from the list of good stocks\n")
