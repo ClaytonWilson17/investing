@@ -189,6 +189,8 @@ def get_good_stock_data(stock, get_any_stock=False):
     # for some reason some stocks fail to decode or have garbage values
     try:
         info = stock['data'].info
+        if info is None:
+            return None
         if keys_not_missing(info.keys()):
             # go through each of the following keys
             info = replace_none_values(info, ['heldPercentInstitutions', 'dividendYield', 'forwardEps', 'trailingEps', 'forwardPE', 'trailingPE', 'priceToBook'])
