@@ -375,6 +375,7 @@ def write_symbols_to_csv(cache=False):
             # Print the progress every 10 percent
             if progress % 10 == 0:
                 print(f'{progress}% complete')
+                logger.debug(f'{progress}% complete')
             # get stock data
             good_stock = get_good_stock_data(stock)
             if good_stock is not None:
