@@ -2,6 +2,7 @@
 
 from helper_functions import custom_signal, get_technical_indicators, sell_signal, general, send_email, get_fundamental_indicators, markus_signal
 import os
+logger = general.getCustomLogger("log.txt")
 
 # List of stocks to get technical indicator data on
 #NASDAQ_symbols = ['CSX', 'AMD', 'GOOGL', 'AMZN', 'DBX', 'AAPL', 'SBUX', 'MSFT', 'CSCO', 'TSCO', 'NVDA']
@@ -10,6 +11,8 @@ NASDAQ_symbols = []
 NYSE_symbols = []
 
 # Get fundamental analysis symbols and data
+print("Getting Fundamental analysis symbols and data...\n")
+logger.debug("Getting Fundamental analysis symbols and data...")
 list_of_dicts = get_fundamental_indicators.write_symbols_to_csv(cache=True)
 for dict in list_of_dicts:
     if dict['exchange'] == "NYSE":
@@ -20,14 +23,17 @@ for dict in list_of_dicts:
             NASDAQ_symbols.append(dict['symbol'])
 
 # Get technical indicators for all stocks
+print("Getting technical analysis data...\n")
+logger.debug("Getting technical analysis data...")
 technical_data = []
 technical_data =get_technical_indicators.get_tech_indicators(NYSE_symbols=NYSE_symbols, NASDAQ_symbols=NASDAQ_symbols)
 # Returns the following keys: Symbol, Price, RSI, Pivot middle, Pivot support 1, Pivot support 2, MACD_line, MACD_signal, Keltner lower, Keltner upper
 
 # Store indicators to be used as a reference in the future:
+print("Storing current technical data and then retrieving yesterdays technical data...\n")
+logger.debug("Storing current technical data and then retrieving yesterdays technical data...")
 data_path = general.dataPath("historical_indicators.pkl")
 general.fileSaveCache(data_path, technical_data, datestamp=True)
-
 historical_indicators = general.fileLoadCache(data_path)
 
 
@@ -62,6 +68,8 @@ if len(custom_stocks_to_buy) > 0:
 
 
 # Find stocks based on Markus signal
+print("Finding any buy or sell signals based on markus functions\n")
+logger.debug("Finding any buy or sell signals based on markus functions")
 stocks_to_buy = []
 stocks_to_sell = []
 for data in technical_data:
@@ -113,13 +121,19 @@ if len(markus_stocks_to_sell) > 0:
 all_stock_data = general.resultsPath('all_stock_data.csv')
 files.append(all_stock_data)
 
+# Get the delta for stocks there added or removed becuase of fundamental analysis
+fundamental_delta = get_fundamental_indicators.get_delta()
+
 # Email out the files
 general.get_env_vars()
 subject = "Stock signals for the day"
+
 # Get which stocks were added or removed from our list of good stocks
+print("Get which stocks were added or removed from the list of good stocks\n")
+logger.debug("Get which stocks were added or removed from the list of good stock")
 deltas = get_fundamental_indicators.get_delta()
 body = """Hello humans, please see the attached csv files for the current buy and sell signals for the day...  buy (sell a put)  sell (sell a call)\n\n
-        We analyze stocks every day. We monitor their changes. If a stock is removed, you should probably stop investing in it because it no longer meets our criteria.\n"""
+We analyze stocks every day. We monitor their changes. If a stock is removed, you should probably stop investing in it because it no longer meets our criteria.\n"""
 body = body + "Added stocks: "+','.join(deltas['added'])+"\n"
 body = body + "Removed stocks: "+','.join(deltas['removed'])+"\n"
 
@@ -127,6 +141,8 @@ receiver_emails = []
 receiver_emails.append(os.environ['simon_email'])
 receiver_emails.append(os.environ['clayton_email'])
 
+print("Send out emails with any files generated attached\n")
+logger.debug("Send out emails with any files generated attached")
 for reciever in receiver_emails:
     send_email.send_email(subject=subject, body=body, receiver_email=reciever, files=files)
 
