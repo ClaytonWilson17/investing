@@ -355,6 +355,7 @@ def write_symbol_to_csv(symbol, exchange, cache=False, get_any_stock=False):
 def write_symbols_to_csv(cache=False):
     start_time = time.time()
     stocks = get_all_symbol_object()
+    count = 1
     # cache these results
     stock_data_path = general.dataPath("all_stock_data.pkl")
     if cache:
@@ -365,8 +366,16 @@ def write_symbols_to_csv(cache=False):
     if stock_data is None:
         print("Starting download of stock data... this should take about 4-6 hours.")
         logger.debug("Starting download of stock data... this should take about 4-6 hours.")
+        count = 0
+        percent_increment = 100 / len(stocks)
         stock_data = []
         for stock in stocks:
+            count+=count
+            progress = (count + 1) * percent_increment
+            # Print the progress every 10 percent
+            if progress % 10 == 0:
+                print(f'{progress}% complete')
+            # get stock data
             good_stock = get_good_stock_data(stock)
             if good_stock is not None:
                 stock_data.append(good_stock)
