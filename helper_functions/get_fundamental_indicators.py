@@ -13,6 +13,8 @@ import pandas as pd
 import yfinance as yf #https://github.com/ranaroussi/yfinance
 from datetime import datetime
 
+logger = general.getCustomLogger("log.txt")
+
 def get_all_symbols():
     general.get_env_vars()
 
@@ -27,6 +29,7 @@ def get_all_symbols():
 
     ## 'Code', 'Name', and 'Exchange' are the useful variables
     print("There are a total of: "+str(len(symbols))+" symbols")
+    logger.debug("There are a total of: "+str(len(symbols))+" symbols")
     return symbols
 
 # this downloads symbol data for the past:
@@ -173,6 +176,12 @@ def increasing_income(earnings_info):
     else:
         return False
 
+def replace_none_values(object, list_of_keys):
+    for key in list_of_keys:
+        if object[key] is None:
+            object[key] = 0
+    return object
+
 def get_good_stock_data(stock, get_any_stock=False):
     '''
     returns dictionary(good_stock) or None
@@ -180,10 +189,14 @@ def get_good_stock_data(stock, get_any_stock=False):
     # for some reason some stocks fail to decode or have garbage values
     try:
         info = stock['data'].info
+        if info is None:
+            return None
         if keys_not_missing(info.keys()):
+            # go through each of the following keys
+            info = replace_none_values(info, ['heldPercentInstitutions', 'dividendYield', 'forwardEps', 'trailingEps', 'forwardPE', 'trailingPE', 'priceToBook'])
+
             good_stock = {}
             # Basic info
-            
             good_stock['shortName'] = info['shortName']
             good_stock['industry'] = info['industry']
             good_stock['symbol'] = info['symbol']
@@ -193,10 +206,7 @@ def get_good_stock_data(stock, get_any_stock=False):
             good_stock['heldPercentInstitutions'] = round((info['heldPercentInstitutions']*100),2)
 
             # Dividends
-            if info['dividendYield'] is not None:
-                good_stock['dividendYield'] = (info['dividendYield']*100) #0.0272=2.72%
-            else:
-                good_stock['dividendYield'] = 0
+            good_stock['dividendYield'] = (info['dividendYield']*100) #0.0272=2.72%
             
             exDividendDate = info['exDividendDate']
             if exDividendDate is not None:
@@ -216,12 +226,12 @@ def get_good_stock_data(stock, get_any_stock=False):
 
             # Assets and debt
             # for some reason they are occationally NA even if the company does have assets or debt
-            totalAssets = info.get('totalAssets')
-            totalDebt = info.get('totalDebt')
-            if totalAssets is None or totalDebt is None:
-                good_stock['debtToAssetsRatio'] = 0
-            else:
-                good_stock['debtToAssetsRatio'] = totalDebt/totalAssets
+            # totalAssets = info.get('totalAssets')
+            # totalDebt = info.get('totalDebt')
+            # if totalAssets is None or totalDebt is None:
+            #     good_stock['debtToAssetsRatio'] = 0
+            # else:
+            #     good_stock['debtToAssetsRatio'] = totalDebt/totalAssets
 
             # profit info
             good_stock['profitMargins'] = info['profitMargins']
@@ -258,6 +268,7 @@ def get_good_stock_data(stock, get_any_stock=False):
                 # we only want 4 quarters increasing revenue or last 4 years increasing revenue/income
                 if (get_any_stock == False) and not (good_stock['4Quarters_increasing_revenue'] or (good_stock['4years_increasing_revenue'] and good_stock['4years_increasing_profit'])):
                     print(good_stock['symbol']+" is a good stock but has a bad income report. Skipping...")
+                    logger.debug(good_stock['symbol']+" is a good stock but has a bad income report. Skipping...")
                     return None
                 
                 # Changes last: 1 week, 1 month, 3 months, 6 months, 1 year, 5 year
@@ -274,15 +285,17 @@ def get_good_stock_data(stock, get_any_stock=False):
                 # stockcharts link with indicators
                 url = "https://stockcharts.com/h-sc/ui?s="+info['symbol']+"&p=D&b=5&g=0&id=p05555723250"
                 good_stock['tech_markus'] = url
-                url = "https://stockcharts.com/h-sc/ui?s="+info['symbol']+"&p=D&b=5&g=0&id=p67002332832"
-                good_stock['tech_chuck'] = url
                 if great_stock:
                     print(info['symbol']+" stock good")
+                    logger.debug(info['symbol']+" stock good")
                 else:
                     print("This was a bad stock but returning results anyway")
+                    logger.debug("This was a bad stock but returning results anyway")
                 return good_stock
             return None
-    except:
+    except Exception as e:
+        print(e)
+        logger.debug(e)
         return None
 
 def clean_for_csv(good_stocks):
@@ -325,6 +338,7 @@ def write_symbol_to_csv(symbol, exchange, cache=False, get_any_stock=False):
             stock_data.append(good_stock)
         general.fileSaveCache(stock_data_path, stock_data)
         print("--- %s seconds to get all stock data  ---" % (round(time.time() - start_time,2)))
+        logger.debug("--- %s seconds to get all stock data  ---" % (round(time.time() - start_time,2)))
     # write to CSV
     if stock_data != []:
         stock_data = clean_for_csv(stock_data)
@@ -332,6 +346,7 @@ def write_symbol_to_csv(symbol, exchange, cache=False, get_any_stock=False):
         general.listOfDictsToCSV(stock_data, stock_csv_path)
     else:
         print(symbol+" is not a good stock")
+        logger.debug(symbol+" is not a good stock")
     return stock_data
 
 # 118m to get through NASDAQ
@@ -340,6 +355,7 @@ def write_symbol_to_csv(symbol, exchange, cache=False, get_any_stock=False):
 def write_symbols_to_csv(cache=False):
     start_time = time.time()
     stocks = get_all_symbol_object()
+    count = 1
     # cache these results
     stock_data_path = general.dataPath("all_stock_data.pkl")
     if cache:
@@ -349,13 +365,24 @@ def write_symbols_to_csv(cache=False):
 
     if stock_data is None:
         print("Starting download of stock data... this should take about 4-6 hours.")
+        logger.debug("Starting download of stock data... this should take about 4-6 hours.")
+        count = 0
+        percent_increment = 100 / len(stocks)
         stock_data = []
         for stock in stocks:
+            count+=count
+            progress = (count + 1) * percent_increment
+            # Print the progress every 10 percent
+            if progress % 10 == 0:
+                print(f'{progress}% complete')
+                logger.debug(f'{progress}% complete')
+            # get stock data
             good_stock = get_good_stock_data(stock)
             if good_stock is not None:
                 stock_data.append(good_stock)
         general.fileSaveCache(stock_data_path, stock_data)
         print("--- %s seconds to get all stock data  ---" % (round(time.time() - start_time,2)))
+        logger.debug("--- %s seconds to get all stock data  ---" % (round(time.time() - start_time,2)))
     # write to CSV
     if stock_data != []:
         stock_data = clean_for_csv(stock_data)
@@ -374,27 +401,32 @@ def write_symbols_to_csv(cache=False):
         #     print("No dividend stocks found")
     else:
         print("No good stocks found")
+        logger.debug("No good stocks found")
     return stock_data
 
 
 def get_delta():
-    filename = "all_stock_data"
-    one_day = timedelta(days=1)
-    yesterday = filename+str(date.today()-one_day)+".pkl"
-    today = filename+str(date.today())+".pkl"
-    yesterday_path = general.dataPath(yesterday)
-    today_path = general.dataPath(today)
-    yesterday_stocks = general.fileLoadCache(yesterday_path, datestamp=False)
-    today_stocks = general.fileLoadCache(today_path, datestamp=False)
+    try:
+        filename = "all_stock_data"
+        one_day = timedelta(days=1)
+        yesterday = filename+str(date.today()-one_day)+".pkl"
+        today = filename+str(date.today())+".pkl"
+        yesterday_path = general.dataPath(yesterday)
+        today_path = general.dataPath(today)
+        yesterday_stocks = general.fileLoadCache(yesterday_path, datestamp=False)
+        today_stocks = general.fileLoadCache(today_path, datestamp=False)
 
-    today_symbols = [stock['symbol'] for stock in today_stocks]
-    yesterday_symbols = [stock['symbol'] for stock in yesterday_stocks]
-    removed_stocks = [d['symbol'] for d in yesterday_stocks if d['symbol'] not in today_symbols]
-    added_stocks = [d['symbol'] for d in today_stocks if d['symbol'] not in yesterday_symbols]
-    
-    yesterday_csv = general.resultsPath("yesterday_stocks.csv")
-    today_csv = general.resultsPath("today_stocks.csv")
-    general.listOfDictsToCSV(yesterday_stocks, yesterday_csv)
-    general.listOfDictsToCSV(today_stocks, today_csv)
+        today_symbols = [stock['symbol'] for stock in today_stocks]
+        yesterday_symbols = [stock['symbol'] for stock in yesterday_stocks]
+        removed_stocks = [d['symbol'] for d in yesterday_stocks if d['symbol'] not in today_symbols]
+        added_stocks = [d['symbol'] for d in today_stocks if d['symbol'] not in yesterday_symbols]
+        
+        yesterday_csv = general.resultsPath("yesterday_stocks.csv")
+        today_csv = general.resultsPath("today_stocks.csv")
+        general.listOfDictsToCSV(yesterday_stocks, yesterday_csv)
+        general.listOfDictsToCSV(today_stocks, today_csv)
+    except:
+        removed_stocks = []
+        added_stocks =[]
 
     return {"added": added_stocks, "removed": removed_stocks}

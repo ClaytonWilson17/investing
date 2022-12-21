@@ -2,6 +2,7 @@ import os
 import sys
 import csv
 import pickle
+import logging
 from datetime import date, datetime, timedelta
 
 def get_git_root(path=os.getcwd()):
@@ -149,3 +150,17 @@ def get_historical_indicators(sym, days_ago):
         historical_data = 'no data'
 
     return historical_data
+
+def getCustomLogger(logfile_name):
+    filepath=dataPath(logfile_name)
+    logger = logging.getLogger(logfile_name)
+    logger.setLevel(logging.DEBUG)
+    # Log message format
+    fmt = '%(levelname)8s - %(message)s'
+    formatter = logging.Formatter(fmt)
+    # Make the log file
+    file_handler = logging.FileHandler(filepath, mode='w')
+    file_handler.setFormatter(formatter)
+    logger.addHandler(file_handler)
+    #logger.basicConfig(filename=filepath, filemode='w', format='%(name)s - %(levelname)s - %(message)s')
+    return logger
