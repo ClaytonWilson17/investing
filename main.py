@@ -122,16 +122,11 @@ if len(markus_stocks_to_sell) > 0:
 all_stock_data = general.resultsPath('all_stock_data.csv')
 files.append(all_stock_data)
 
-# Get the delta for stocks there added or removed becuase of fundamental analysis
-fundamental_delta = get_fundamental_indicators.get_delta()
-
 # Email out the files
 general.get_env_vars()
 subject = "Stock signals for the day " + str(datetime.today().strftime('%Y-%m-%d'))
 
 # Get which stocks were added or removed from our list of good stocks
-print("Get which stocks were added or removed from the list of good stocks\n")
-logger.debug("Get which stocks were added or removed from the list of good stock")
 deltas = get_fundamental_indicators.get_delta()
 body = """Hello humans, please see the attached csv files for the current buy and sell signals for the day...  buy (sell a put)  sell (sell a call)\n\n
 We analyze stocks every day. We monitor their changes. If a stock is removed, you should probably stop investing in it because it no longer meets our criteria.\n"""
