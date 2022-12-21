@@ -74,7 +74,7 @@ logger.debug("Finding any buy or sell signals based on markus functions")
 stocks_to_buy = []
 stocks_to_sell = []
 for data in technical_data:
-    past_data = general.get_historical_indicators(sym=data['Symbol'], days_ago=2)
+    past_data = general.get_historical_indicators(sym=data['Symbol'], days_ago=1)
     if past_data != 'no data':
         signal = []
         signal = markus_signal.determine_buy_signals(RSI=data['RSI'], past_RSI=past_data['RSI'], stochastic=data['Stochastic'], past_stochastic=past_data['Stochastic'] ,macd_line=data['MACD_line'], macd_signal=data['MACD_signal'])
