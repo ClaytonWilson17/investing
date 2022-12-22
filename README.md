@@ -39,10 +39,10 @@ If you would like to add or remove any stocks from the list, you can:
 ## scheduled tasks
 * Purpose: this gets the latest changes from this repo, installs dependencies, and then runs the script every midnight when the markets will be open the next day. Results should be ready before 8am eastern time monday->Friday.
 * utility: crontab
-* 0 16 * * 0-4      = At 6pm EST on every day-of-week from Sunday through Thursday.
+* 0 20 * * 0-4      = At 8pm EST on every day-of-week from Sunday through Thursday.
 * path on simon's server: /media/apps/investing/update-and-run.sh
 * internet speed: 800~mbs
 * exact crontab line:
 ```
-0 16 * * 0-4 /media/apps/investing/update-and-run.sh
+0 20 * * 0-4 /media/apps/investing/update-and-run.sh
 ```
