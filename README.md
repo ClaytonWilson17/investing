@@ -12,7 +12,7 @@ you can join our mailing list. By joining this mailing list you will receive:
     * Stocks that are added or removed from our stock list
 
 
-We can add you to our mailing list for $30 bucks a month and you can cancel this at any time. There are no refunds. Email simonowens157@gmail.com to begin the signup and subscription process. 
+We can add you to our mailing list for $30/month and you can cancel this at any time. There are no refunds. Email simonowens157@gmail.com to begin the signup and subscription process. 
 ## runtime overview
 This script cannot easily be run. It takes roughly 12 hours(on an old server with 800mbs internet while runing in a docker container) to complete with fast internet because it searches through every stock in the NASDAQ and NYSE. You could run tasks in paralell but then you would be spamming Yahoo's public API. You could run this on AWS but it would cost more than joining the mailing list. It is best to run overnight slowly on a server as a scheduled task. The NASDAQ only has roughly 25% of the symbols we use as good stocks, but yet has 8000 of the 11000 total symbols we search through. NYSE has much more robust stocks in that exchange per our filters. 
 ## Environment variables
