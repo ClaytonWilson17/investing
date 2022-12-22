@@ -6,7 +6,7 @@ Code to help with stock investments (mainly which stocks are at a good time to s
 This tool and strategy is for investors looking to have above average returns while minimizing the risk that comes with investing in individual stocks. Using this strategy you will:
 * Spend several weeks learning about basic options and investment principles
 * Spend 30 minutes per week implimenting these strategies
-* Ideally get 20-35% anual return on investment. This is not a garantee or financial advise, but an average of what we've seen. 
+* Ideally get 20-35% anual return on investment. This is not a garantee or financial advice, but an average of what we've seen. 
 * Have 10,000 USD or more for investing in stable stocks
 
 ## Mailing list for options investors
