@@ -1,11 +1,20 @@
 # Investing
 Code to help with stock investments (mainly which stocks are at a good time to sell a put or sell a call). BUY=stock will go up. Sell=stock will go down. We plan on adding in more technical indicators, but for right now ours works pretty well.
 
+
+## Who is this for?
+This tool and strategy is for investors looking to have above average returns while minimizing the risk that comes with investing in individual stocks. Using this strategy you will:
+* Spend several weeks learning about basic options and investment principles
+* Spend 30 minutes per week implimenting these strategies
+* Ideally get 20-35% anual return on investment. This is not a garantee or financial advise, but an average of what we've seen. 
+* Have 10,000 USD or more for investing in stable stocks
+
 ## Mailing list for options investors
 This repository can be difficult to setup and costly to run nightly. Some users may not be able to run these tools because of a lack of internet speed. Instead, 
 you can join our mailing list. By joining this mailing list you will receive:
 * An investment cheatsheet for options investors
-* Investment links and plans for trading "The Wheel" by Markus Heitkoetter
+* An investment plan leveraging this tool
+* Links and cheatsheets for trading the this options strategy
 * One daily email(monday through friday before the market opens)
     * List of stable and reliable stocks
     * List of buy and sell signals as they occur. See "sell-signals.csv" for an example of what you might see.
