@@ -31,6 +31,8 @@ We choose stocks based on guidance from markus heitkoetter. We don't invest in s
 1. Our script will finish early morning before the stock market opens. Say 5-10-2022
 2. Our script will look at the yesterday's technical indicators to determine if indicators are going up, or down. Say 5-9-2022
 3. As a result, 5-9-2022 technical data is BEFORE the market opened. 5-10-2022 is AFTER the market closed. Both really occuring on 5-9-2022. 
+
+
 If you want to see another technical indicator, open a request and site which books and professionals use this strategy with some examples. Once we see the value in this strategy we could work on implementing it.
 ## adding symbols
 If you would like to add or remove any stocks from the list, you can:
