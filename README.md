@@ -1,13 +1,18 @@
 # Investing
 Code to help with stock investments (mainly which stocks are at a good time to sell a put or sell a call). BUY=stock will go up. Sell=stock will go down. We plan on adding in more technical indicators, but for right now ours works pretty well.
 
-## Instructions
-This script cannot easily be run. It takes roughly 12 hours(on an old server with 800mbs internet while runing in a docker container) to complete with fast internet because it searches through every stock in the NASDAQ and NYSE. You could run tasks in paralell but then you would be spamming Yahoo's public API. It is best to run overnight slowly on a server as a scheduled task. The NASDAQ only has roughly 25% of the symbols we use as good stocks, but yet has 8000 of the 11000 total symbols we search through. NYSE has much more robust stocks in that exchange per our filters. We can add you to our mailing list for $30 bucks a month and you can canel this at any time. Email investingbot2@gmail.com to begin the signup subscription process. You will receive:
+## Mailing list for options investors
+This repository can be difficult to setup and costly to run nightly. Some users may not be able to run these tools because of a lack of internet speed. Instead, 
+you can join our mailing list. By joining this mailing list you will receive:
+* An investment cheatsheet for options investors
+* Investment links and plans for trading "The Wheel" by Markus Heitkoetter
 * One daily email(monday through friday before the market opens)
-* List of good stocks
-* List of buy and sell signals as they occur
-* Stocks that are added or removed from our stock list
-See "sell-signals.csv" for an example of what you might see.
+    * List of stable and reliable stocks
+    * List of buy and sell signals as they occur. See "sell-signals.csv" for an example of what you might see.
+    * Stocks that are added or removed from our stock list
+We can add you to our mailing list for $30 bucks a month and you can cancel this at any time. There are no refunds. Email simonowens157@gmail.com to begin the signup and subscription process. 
+## runtime overview
+This script cannot easily be run. It takes roughly 12 hours(on an old server with 800mbs internet while runing in a docker container) to complete with fast internet because it searches through every stock in the NASDAQ and NYSE. You could run tasks in paralell but then you would be spamming Yahoo's public API. You could run this on AWS but it would cost more than joining the mailing list. It is best to run overnight slowly on a server as a scheduled task. The NASDAQ only has roughly 25% of the symbols we use as good stocks, but yet has 8000 of the 11000 total symbols we search through. NYSE has much more robust stocks in that exchange per our filters. 
 ## Environment variables
 Please add these environment variables to a .env file with their values
 ```
@@ -24,6 +29,7 @@ We choose stocks based on guidance from markus heitkoetter. We don't invest in s
 1. Our script will finish early morning before the stock market opens. Say 5-10-2022
 2. Our script will look at the yesterday's technical indicators to determine if indicators are going up, or down. Say 5-9-2022
 3. As a result, 5-9-2022 technical data is BEFORE the market opened. 5-10-2022 is AFTER the market closed. Both really occuring on 5-9-2022. 
+If you want to see another technical indicator, open a request and site which books and professionals use this strategy with some examples. Once we see the value in this strategy we could work on implementing it.
 ## adding symbols
 If you would like to add or remove any stocks from the list, you can:
 * Open the "main.py" file
