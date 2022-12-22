@@ -14,7 +14,7 @@ NYSE_symbols = []
 # Get fundamental analysis symbols and data
 print("Getting Fundamental analysis symbols and data...\n")
 logger.debug("Getting Fundamental analysis symbols and data...")
-list_of_dicts = get_fundamental_indicators.write_symbols_to_csv(cache=True)
+list_of_dicts = get_fundamental_indicators.write_symbols_to_csv(cache=False)
 for dict in list_of_dicts:
     if dict['exchange'] == "NYSE":
         if dict['symbol'] not in NYSE_symbols:
