@@ -57,5 +57,5 @@ If you would like to add or remove any stocks from the list, you can:
 * internet speed: 800~mbs
 * exact crontab line:
 ```
-0 20 * * 0-4 /media/apps/investing/update-and-run.sh
+0 20 * * 0-4 cd /media/apps/investing/ && ./update-and-run.sh
 ```
