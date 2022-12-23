@@ -2,8 +2,12 @@
 
 from helper_functions import custom_signal, get_technical_indicators, sell_signal, general, send_email, get_fundamental_indicators, markus_signal
 import os
-from datetime import datetime
+from datetime import datetime, date
 logger = general.getCustomLogger("log.txt")
+
+today = date.today()
+print("starting this script on: "+today)
+logger.debug("starting this script on: "+today)
 
 # List of stocks to get technical indicator data on
 #NASDAQ_symbols = ['CSX', 'AMD', 'GOOGL', 'AMZN', 'DBX', 'AAPL', 'SBUX', 'MSFT', 'CSCO', 'TSCO', 'NVDA']
@@ -144,3 +148,6 @@ files.append(log_path)
 for reciever in receiver_emails:
     send_email.send_email(subject=subject, body=body, receiver_email=reciever, files=files)
 
+today = date.today()
+print("ending this script on: "+today)
+logger.debug("ending this script on: "+today)
