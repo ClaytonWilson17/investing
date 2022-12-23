@@ -5,4 +5,4 @@ rm -f data/log.txt
 touch data/log.txt
 git pull
 # inside python container
-docker container run -w="/src/" -v $(pwd):/src/ -t python:3.10 /bin/bash -c "pip3 install -r requirements.txt; python3 main.py"
+docker container run -w="/src/" -v /media/apps/investing/:/src/ -t python:3.10 /bin/bash -c "pip3 install -r requirements.txt; python3 main.py"
