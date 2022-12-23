@@ -6,6 +6,7 @@ from datetime import datetime, date
 logger = general.getCustomLogger("log.txt")
 
 today = date.today()
+today = today.strftime("%m/%d/%y")
 print("starting this script on: "+today)
 logger.debug("starting this script on: "+today)
 
@@ -149,5 +150,6 @@ for reciever in receiver_emails:
     send_email.send_email(subject=subject, body=body, receiver_email=reciever, files=files)
 
 today = date.today()
+today = today.strftime("%m/%d/%y")
 print("ending this script on: "+today)
 logger.debug("ending this script on: "+today)
