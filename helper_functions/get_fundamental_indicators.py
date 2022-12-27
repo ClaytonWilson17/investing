@@ -7,6 +7,7 @@ reload(general)
 import os
 import json
 import requests
+from pathlib import Path
 import time
 from datetime import date, datetime, timedelta
 import pandas as pd
@@ -408,20 +409,38 @@ def write_symbols_to_csv(cache=False):
 def get_delta():
     try:
         filename = "all_stock_data"
-        one_day = timedelta(days=1)
-        yesterday = filename+str(date.today()-one_day)+".pkl"
         today = filename+str(date.today())+".pkl"
-        yesterday_path = general.dataPath(yesterday)
         today_path = general.dataPath(today)
-        yesterday_stocks = general.fileLoadCache(yesterday_path, datestamp=False)
         today_stocks = general.fileLoadCache(today_path, datestamp=False)
+
+        # attempt to get yesterday's stock file if it exists, otherwise keep going back to the day before
+        logger = general.getCustomLogger("log.txt")
+        days_ago = 1
+        today = datetime.now() 
+        file_does_not_exist = True
+        while file_does_not_exist == True:
+            if days_ago > 60:
+                print ("There is no past fundamental data so the Markus/Chuck signal will not work")
+                logger.debug("There is no past fundamental data so the Markus/Chuck signal will not work")
+                return 'no data'
+            past_date = today - timedelta(days=days_ago)
+            past_date = past_date.strftime('%Y-%m-%d')
+            yesterday_path = general.dataPath("all_stock_data" + str(past_date) + ".pkl")
+            my_file = Path(yesterday_path)
+            if my_file.is_file():
+                file_does_not_exist = False
+            else:
+                print ("There is no past for: " + str(past_date) + ". Going back one more day")
+                logger.debug("There is no past for: " + str(past_date) + ". Going back one more day")
+                days_ago = days_ago + 1
+        yesterday_stocks = general.fileLoadCache(yesterday_path, datestamp=False)
 
         today_symbols = [stock['symbol'] for stock in today_stocks]
         yesterday_symbols = [stock['symbol'] for stock in yesterday_stocks]
         removed_stocks = [d['symbol'] for d in yesterday_stocks if d['symbol'] not in today_symbols]
         added_stocks = [d['symbol'] for d in today_stocks if d['symbol'] not in yesterday_symbols]
         
-        yesterday_csv = general.resultsPath("yesterday_stocks.csv")
+        yesterday_csv = general.resultsPath("previous_stocks.csv")
         today_csv = general.resultsPath("today_stocks.csv")
         general.listOfDictsToCSV(yesterday_stocks, yesterday_csv)
         general.listOfDictsToCSV(today_stocks, today_csv)

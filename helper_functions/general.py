@@ -97,6 +97,22 @@ def resultsPath(filename=None):
     else:
         return path
 
+def getCustomLogger(logfile_name):
+    filepath=dataPath(logfile_name)
+    logger = logging.getLogger(logfile_name)
+    logger.setLevel(logging.DEBUG)
+    # Log message format
+    fmt = '%(levelname)8s - %(message)s'
+    formatter = logging.Formatter(fmt)
+    # Make the log file
+    file_handler = logging.FileHandler(filepath, mode='w')
+    file_handler.setFormatter(formatter)
+    logger.addHandler(file_handler)
+    #logger.basicConfig(filename=filepath, filemode='w', format='%(name)s - %(levelname)s - %(message)s')
+    return logger
+
+logger = getCustomLogger("log.txt")
+
 def fileSaveCache(filepath, data, datestamp=True):
     if os.path.exists(filepath):
         print("already cached... overwriting it")
@@ -136,12 +152,12 @@ def get_historical_indicators(sym, days_ago):
     logger = getCustomLogger("log.txt")
     today = datetime.now() 
     print ('Attempting to load historical technical indicator data...')
-    logging.debug('Attempting to load historical technical indicator data...')
+    logger.debug('Attempting to load historical technical indicator data...')
     file_does_not_exist = True
     while file_does_not_exist == True:
         if days_ago > 60:
             print ("There is no past indicator data so the Markus/Chuck signal will not work")
-            logging.debug("There is no past indicator data so the Markus/Chuck signal will not work")
+            logger.debug("There is no past indicator data so the Markus/Chuck signal will not work")
             return 'no data'
         past_date = today - timedelta(days=days_ago)
         past_date = past_date.strftime('%Y-%m-%d')
@@ -151,7 +167,7 @@ def get_historical_indicators(sym, days_ago):
             file_does_not_exist = False
         else:
             print ("There is no past for: " + str(past_date) + ". Going back one more day")
-            logging.debug("There is no past for: " + str(past_date) + ". Going back one more day")
+            logger.debug("There is no past for: " + str(past_date) + ". Going back one more day")
             days_ago = days_ago + 1
     
     data = fileLoadCache(data_path, datestamp=False)
@@ -168,17 +184,3 @@ def get_historical_indicators(sym, days_ago):
         historical_data = 'no data'
 
     return historical_data
-
-def getCustomLogger(logfile_name):
-    filepath=dataPath(logfile_name)
-    logger = logging.getLogger(logfile_name)
-    logger.setLevel(logging.DEBUG)
-    # Log message format
-    fmt = '%(levelname)8s - %(message)s'
-    formatter = logging.Formatter(fmt)
-    # Make the log file
-    file_handler = logging.FileHandler(filepath, mode='w')
-    file_handler.setFormatter(formatter)
-    logger.addHandler(file_handler)
-    #logger.basicConfig(filename=filepath, filemode='w', format='%(name)s - %(levelname)s - %(message)s')
-    return logger
