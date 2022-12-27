@@ -5,8 +5,8 @@ import os
 from datetime import datetime, date
 logger = general.getCustomLogger("log.txt")
 
-today = date.today()
-today = today.strftime("%m/%d/%y")
+today = datetime.now()
+today = today.strftime("%m/%d/%y %H:%M")
 print("starting this script on: "+today)
 logger.debug("starting this script on: "+today)
 
@@ -120,6 +120,10 @@ markus_sell_path = general.resultsPath('Markus Sell Signal.csv')
 if len(markus_stocks_to_sell) > 0:
     files.append(markus_sell_path)
     general.listOfDictsToCSV(markus_stocks_to_sell, markus_sell_path)
+today = datetime.now()
+today = today.strftime("%m/%d/%y %H:%M")
+print("Done with fundamental and technical analysis on: "+today)
+logger.debug("Done with fundamental and technical analysis on: "+today)
 
 #allpath = general.resultsPath('All Stocks.csv')
 #general.listOfDictsToCSV(technical_data, allpath)
@@ -148,8 +152,3 @@ log_path = general.dataPath('log.txt')
 files.append(log_path)
 for reciever in receiver_emails:
     send_email.send_email(subject=subject, body=body, receiver_email=reciever, files=files)
-
-today = date.today()
-today = today.strftime("%m/%d/%y")
-print("ending this script on: "+today)
-logger.debug("ending this script on: "+today)
