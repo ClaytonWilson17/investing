@@ -4,6 +4,7 @@ import csv
 import pickle
 import logging
 from datetime import date, datetime, timedelta
+from pathlib import Path
 
 def get_git_root(path=os.getcwd()):
     
@@ -132,10 +133,27 @@ def clean_list_of_dicts(list_of_dicts):
 
 
 def get_historical_indicators(sym, days_ago):
+    logger = getCustomLogger("log.txt")
     today = datetime.now() 
-    past_date = today - timedelta(days=days_ago)
-    past_date = past_date.strftime('%Y-%m-%d')
-    data_path = dataPath("historical_indicators" + str(past_date) + ".pkl")
+    print ('Attempting to load historical technical indicator data...')
+    logging.debug('Attempting to load historical technical indicator data...')
+    file_does_not_exist = True
+    while file_does_not_exist == True:
+        if days_ago > 60:
+            print ("There is no past indicator data so the Markus/Chuck signal will not work")
+            logging.debug("There is no past indicator data so the Markus/Chuck signal will not work")
+            return 'no data'
+        past_date = today - timedelta(days=days_ago)
+        past_date = past_date.strftime('%Y-%m-%d')
+        data_path = dataPath("historical_indicators" + str(past_date) + ".pkl")
+        my_file = Path(data_path)
+        if my_file.is_file():
+            file_does_not_exist = False
+        else:
+            print ("There is no past for: " + str(past_date) + ". Going back one more day")
+            logging.debug("There is no past for: " + str(past_date) + ". Going back one more day")
+            days_ago = days_ago + 1
+    
     data = fileLoadCache(data_path, datestamp=False)
     if data is None:
         print ("There is no past indicator data so the Markus/Chuck signal will not work")
