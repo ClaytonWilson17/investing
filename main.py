@@ -13,8 +13,8 @@ logger.debug("starting this script on: "+today)
 # List of stocks to get technical indicator data on
 #NASDAQ_symbols = ['CSX', 'AMD', 'GOOGL', 'AMZN', 'DBX', 'AAPL', 'SBUX', 'MSFT', 'CSCO', 'TSCO', 'NVDA']
 #NYSE_symbols = ['BAC', 'SYF', 'IBM', 'DKS', 'KR', 'UNH', 'DUK', 'TM', 'CNI', 'V', 'DE', 'FE', 'MA', 'O', 'LMT', 'WMT', 'DGX', 'WM', 'GIS', 'JPM', 'T', 'ABBV', 'JNJ', 'VALE', 'LOW', 'LEN', 'CVX', 'XOM', 'CAT', 'NKE']
-NASDAQ_symbols = []
-NYSE_symbols = []
+NASDAQ_symbols = ['AEP', 'CME']
+NYSE_symbols = ['AFL', 'CAT', 'VISA', 'JNJ']
 
 # Get fundamental analysis symbols and data
 print("Getting Fundamental analysis symbols and data...\n")
