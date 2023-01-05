@@ -284,8 +284,12 @@ def get_good_stock_data(stock, get_any_stock=False):
                 url = "https://g.co/finance/"+info['symbol']+":"+stock['exchange']
                 good_stock['fundamentals_url'] = url
                 # stockcharts link with indicators
+                url = "https://stockcharts.com/h-sc/ui?s="+info['symbol']+"&p=D&yr=0&mn=1&dy=0&id=p00835703143"
+                good_stock['daily_chart'] = url
+
                 url = "https://stockcharts.com/h-sc/ui?s="+info['symbol']+"&p=D&b=5&g=0&id=p05555723250"
-                good_stock['tech_markus'] = url
+                good_stock['5mo_chart'] = url
+
                 if great_stock:
                     print(info['symbol']+" stock good")
                     logger.debug(info['symbol']+" stock good")
