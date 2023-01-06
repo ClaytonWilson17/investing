@@ -17,8 +17,9 @@ from datetime import datetime
 logger = general.getCustomLogger("log.txt")
 
 def is_composite_stock(stock_info):
-    if stock_info['symbol'] in ["^IXIC", "^NYA", "^DJI", "^SPX"]:
-        return True
+    for symbol in ["^IXIC", "^NYA", "^DJI", "^SPX"]:
+        if stock_info['symbol'] in symbol:
+            return True
     else:
         return False
 
@@ -42,15 +43,13 @@ def get_composite_stock_symbols(stock_info):
     if stock_info['symbol'] == "^IXIC":
         stock_info['goog_finance_symbol'] = ".IXIC:INDEXNASDAQ"
         stock_info['stockcharts_syymbol'] = "%24COMPQ"
+        stock_info['symbol'] = "IXIC"
+        stock_info['exchange'] = "NASDAQ"
     elif stock_info['symbol'] == "^NYA":
         stock_info['goog_finance_symbol'] = "NYA:INDEXNYSEGIS"
         stock_info['stockcharts_syymbol'] = "%24NYA"
-    elif stock_info['symbol'] == "^DJI":
-        stock_info['goog_finance_symbol'] = ".DJI:INDEXDJX"
-        stock_info['stockcharts_syymbol'] = "%24INDU"
-    elif stock_info['symbol'] == "^SPX":
-        stock_info['goog_finance_symbol'] = ".INX:INDEXSP"
-        stock_info['stockcharts_syymbol'] = "%24SPCMI"
+        stock_info['symbol'] = "NYA"
+        stock_info['exchange'] = "NYSE"
     return stock_info
 
 def get_all_symbols():
@@ -85,7 +84,7 @@ def get_all_symbol_object(add_composites=True):
         data = yf.Ticker(ticker['Code'])
         stock_data.append({"data":data, "exchange":ticker['Exchange']})
     if add_composites:
-        composites = ["^IXIC", "^NYA", "^DJI", "^SPX"]
+        composites = ["^IXIC", "^NYA"]
         for composite in composites:
             data = yf.Ticker(composite)
             stock_data.append({"data":data, "exchange":ticker['Exchange']})

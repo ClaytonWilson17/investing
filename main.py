@@ -14,7 +14,7 @@ logger.debug("starting this script on: "+today)
 #NASDAQ_symbols = ['CSX', 'AMD', 'GOOGL', 'AMZN', 'DBX', 'AAPL', 'SBUX', 'MSFT', 'CSCO', 'TSCO', 'NVDA']
 #NYSE_symbols = ['BAC', 'SYF', 'IBM', 'DKS', 'KR', 'UNH', 'DUK', 'TM', 'CNI', 'V', 'DE', 'FE', 'MA', 'O', 'LMT', 'WMT', 'DGX', 'WM', 'GIS', 'JPM', 'T', 'ABBV', 'JNJ', 'VALE', 'LOW', 'LEN', 'CVX', 'XOM', 'CAT', 'NKE']
 NASDAQ_symbols = [] #symbols to add: 'AEP', 'CME'
-NYSE_symbols = [] #symbols to add: 'AFL', 'CAT', 'VISA', 'JNJ'
+NYSE_symbols = [] #symbols to add: 'AFL', 'CAT', 'VISA', 'JNJ', 'DUK'
 
 # Get fundamental analysis symbols and data
 print("Getting Fundamental analysis symbols and data...\n")
