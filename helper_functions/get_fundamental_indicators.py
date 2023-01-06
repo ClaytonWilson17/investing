@@ -16,6 +16,43 @@ from datetime import datetime
 
 logger = general.getCustomLogger("log.txt")
 
+def is_composite_stock(stock_info):
+    if stock_info['symbol'] in ["^IXIC", "^NYA", "^DJI", "^SPX"]:
+        return True
+    else:
+        return False
+
+def get_composite_stock_symbols(stock_info):
+    # For yahoo finance tool
+        # nasdaq = ^IXIC
+        # NYSE = ^NYA
+        # Dow  = ^DJI 
+        # SP500 = ^SPX
+    # For google finance:
+        # nasdaq = .IXIC:INDEXNASDAQ
+        # NYA = NYA:INDEXNYSEGIS
+        # DOW = .DJI:INDEXDJX
+        # SP500 = .INX:INDEXSP
+    # For stockcharts: 
+        # nasdaq = %24COMPQ
+        # NYA = %24NYA
+        # DOW = %24INDU
+        # SP500 = %24SPCMI
+    stock_info['currentPrice'] = stock_info['regularMarketPrice']
+    if stock_info['symbol'] == "^IXIC":
+        stock_info['goog_finance_symbol'] = ".IXIC:INDEXNASDAQ"
+        stock_info['stockcharts_syymbol'] = "%24COMPQ"
+    elif stock_info['symbol'] == "^NYA":
+        stock_info['goog_finance_symbol'] = "NYA:INDEXNYSEGIS"
+        stock_info['stockcharts_syymbol'] = "%24NYA"
+    elif stock_info['symbol'] == "^DJI":
+        stock_info['goog_finance_symbol'] = ".DJI:INDEXDJX"
+        stock_info['stockcharts_syymbol'] = "%24INDU"
+    elif stock_info['symbol'] == "^SPX":
+        stock_info['goog_finance_symbol'] = ".INX:INDEXSP"
+        stock_info['stockcharts_syymbol'] = "%24SPCMI"
+    return stock_info
+
 def get_all_symbols():
     general.get_env_vars()
 
@@ -36,12 +73,22 @@ def get_all_symbols():
 # this downloads symbol data for the past:
 #  symbol "info" takes 3 seconds to download. 9.3 hours total
 #  symbol (% changes last 5 years, 4 quarters earnings info) takes 1.7 sec
-def get_all_symbol_object():
+# For yahoo finance tool
+    # nasdaq = ^IXIC
+    # NYSE = ^NYA
+    # Dow  = ^DJI 
+    # SP500 = ^SPX
+def get_all_symbol_object(add_composites=True):
     ticker_list = get_all_symbols()
     stock_data = []
     for ticker in ticker_list:
         data = yf.Ticker(ticker['Code'])
         stock_data.append({"data":data, "exchange":ticker['Exchange']})
+    if add_composites:
+        composites = ["^IXIC", "^NYA", "^DJI", "^SPX"]
+        for composite in composites:
+            data = yf.Ticker(composite)
+            stock_data.append({"data":data, "exchange":ticker['Exchange']})
     return stock_data
 
 def get_symbol_object(stock_code, exchange):
@@ -179,7 +226,9 @@ def increasing_income(earnings_info):
 
 def replace_none_values(object, list_of_keys):
     for key in list_of_keys:
-        if object[key] is None:
+        if key not in object.keys():
+            object[key] = 0
+        elif object[key] is None:
             object[key] = 0
     return object
 
@@ -192,10 +241,11 @@ def get_good_stock_data(stock, get_any_stock=False):
         info = stock['data'].info
         if info is None:
             return None
-        if keys_not_missing(info.keys()):
+        if is_composite_stock(info):
+            info = get_composite_stock_symbols(info)
+        if keys_not_missing(info.keys()) or is_composite_stock(info):
             # go through each of the following keys
-            info = replace_none_values(info, ['heldPercentInstitutions', 'dividendYield', 'forwardEps', 'trailingEps', 'forwardPE', 'trailingPE', 'priceToBook'])
-
+            info = replace_none_values(info, ['heldPercentInstitutions', 'industry', 'profitMargins','dividendYield', 'forwardEps', 'trailingEps', 'forwardPE', 'trailingPE', 'priceToBook', 'returnOnAssets', 'returnOnEquity', 'debtToEquity', 'sharesOutstanding', 'floatShares', 'totalRevenue', 'grossProfits'])
             good_stock = {}
             # Basic info
             good_stock['shortName'] = info['shortName']
@@ -205,7 +255,6 @@ def get_good_stock_data(stock, get_any_stock=False):
             good_stock['currentPrice'] = info['currentPrice']
             good_stock['marketCap'] = info['marketCap']
             good_stock['heldPercentInstitutions'] = round((info['heldPercentInstitutions']*100),2)
-
             # Dividends
             good_stock['dividendYield'] = (info['dividendYield']*100) #0.0272=2.72%
             
@@ -249,29 +298,37 @@ def get_good_stock_data(stock, get_any_stock=False):
             if (large_cap(info['marketCap']) and good_dividend(info['dividendYield']) and good_instutional_ownership(info['heldPercentInstitutions']) and affordable_price(info['currentPrice']) and good_pb_ratio(info['priceToBook']) and good_pe_ratio(info['forwardPE'])):
                 great_stock = True
             if get_any_stock or great_stock:
-                # next earnings date
-                # for some reason, the data is not well formatted. 0 or "Value" as keys
-                earnings_object = (stock['data'].calendar).to_dict()
-                if 0 in earnings_object.keys():
-                    nextEarningsDate = (stock['data'].calendar).to_dict()[0]['Earnings Date']
-                elif "Value" in earnings_object.keys():
-                    nextEarningsDate = (stock['data'].calendar).to_dict()['Value']['Earnings Date']
-                good_stock['nextEarningsDate'] = nextEarningsDate
+                # Composite stocks (SP500, DOW jones, etc) don't have earnings
+                if is_composite_stock(info):
+                    good_stock['nextEarningsDate'] = "NA"
+                    good_stock['4Quarters_increasing_revenue'] = "NA"
+                    good_stock['4Quarters_increasing_profit'] = "NA"
+                    good_stock['4years_increasing_revenue'] = "NA"
+                    good_stock['4years_increasing_profit'] = "NA"
+                else:
+                    # next earnings date
+                    # for some reason, the data is not well formatted. 0 or "Value" as keys
+                    earnings_object = (stock['data'].calendar).to_dict()
+                    if 0 in earnings_object.keys():
+                        nextEarningsDate = (stock['data'].calendar).to_dict()[0]['Earnings Date']
+                    elif "Value" in earnings_object.keys():
+                        nextEarningsDate = (stock['data'].calendar).to_dict()['Value']['Earnings Date']
+                    good_stock['nextEarningsDate'] = nextEarningsDate
 
-                # Quarterly/Yearly income
-                quarterly_earnings_info = (stock['data'].get_earnings(freq="quarterly")).to_dict()
-                yearly_earnings_info = (stock['data'].get_earnings(freq="yearly")).to_dict()
-                good_stock['4Quarters_increasing_revenue'] = increasing_revenue(quarterly_earnings_info)
-                good_stock['4Quarters_increasing_profit'] = increasing_income(quarterly_earnings_info)
-                good_stock['4years_increasing_revenue'] = increasing_revenue(yearly_earnings_info)
-                good_stock['4years_increasing_profit'] = increasing_income(yearly_earnings_info)
+                    # Quarterly/Yearly income
+                    quarterly_earnings_info = (stock['data'].get_earnings(freq="quarterly")).to_dict()
+                    yearly_earnings_info = (stock['data'].get_earnings(freq="yearly")).to_dict()
+                    good_stock['4Quarters_increasing_revenue'] = increasing_revenue(quarterly_earnings_info)
+                    good_stock['4Quarters_increasing_profit'] = increasing_income(quarterly_earnings_info)
+                    good_stock['4years_increasing_revenue'] = increasing_revenue(yearly_earnings_info)
+                    good_stock['4years_increasing_profit'] = increasing_income(yearly_earnings_info)
 
-                # we only want 4 quarters increasing revenue or last 4 years increasing revenue/income
-                if (get_any_stock == False) and not (good_stock['4Quarters_increasing_revenue'] or (good_stock['4years_increasing_revenue'] and good_stock['4years_increasing_profit'])):
-                    print(good_stock['symbol']+" is a good stock but has a bad income report. Skipping...")
-                    logger.debug(good_stock['symbol']+" is a good stock but has a bad income report. Skipping...")
-                    return None
-                
+                    # we only want 4 quarters increasing revenue or last 4 years increasing revenue/income
+                    if (get_any_stock == False) and not (good_stock['4Quarters_increasing_revenue'] or (good_stock['4years_increasing_revenue'] and good_stock['4years_increasing_profit'])):
+                        print(good_stock['symbol']+" is a good stock but has a bad income report. Skipping...")
+                        logger.debug(good_stock['symbol']+" is a good stock but has a bad income report. Skipping...")
+                        return None
+                    
                 # Changes last: 1 week, 1 month, 3 months, 6 months, 1 year, 5 year
                 good_stock['pct_chg_5y'] = round((get_stock_percentage_change(stock['data'], "5y")*100),2)
                 good_stock['pct_chg_1y'] = round((get_stock_percentage_change(stock['data'], "1y")*100),2)
@@ -280,15 +337,25 @@ def get_good_stock_data(stock, get_any_stock=False):
                 good_stock['pct_chg_1mo'] = round((get_stock_percentage_change(stock['data'], "1mo")*100),2)
                 good_stock['pct_chg_1wk'] = round((get_stock_percentage_change(stock['data'], "1wk")*100),2)
                 
-                # Google finance link
-                url = "https://g.co/finance/"+info['symbol']+":"+stock['exchange']
-                good_stock['fundamentals_url'] = url
-                # stockcharts link with indicators
-                url = "https://stockcharts.com/h-sc/ui?s="+info['symbol']+"&p=D&yr=0&mn=1&dy=0&id=p00835703143"
-                good_stock['daily_chart'] = url
-
-                url = "https://stockcharts.com/h-sc/ui?s="+info['symbol']+"&p=D&b=5&g=0&id=p05555723250"
-                good_stock['5mo_chart'] = url
+                # special consideration is needed for indexes when building URLs
+                if is_composite_stock(info):
+                    # Google finance link
+                    url = "https://g.co/finance/"+info['goog_finance_symbol']
+                    good_stock['fundamentals_url'] = url
+                    # stockcharts link with indicators
+                    url = "https://stockcharts.com/h-sc/ui?s="+info['stockcharts_syymbol']+"&p=D&yr=0&mn=1&dy=0&id=p00835703143"
+                    good_stock['daily_chart'] = url
+                    url = "https://stockcharts.com/h-sc/ui?s="+info['stockcharts_syymbol']+"&p=D&b=5&g=0&id=p05555723250"
+                    good_stock['5mo_chart'] = url
+                else:
+                    # Google finance link
+                    url = "https://g.co/finance/"+info['symbol']+":"+stock['exchange']
+                    good_stock['fundamentals_url'] = url
+                    # stockcharts link with indicators
+                    url = "https://stockcharts.com/h-sc/ui?s="+info['symbol']+"&p=D&yr=0&mn=1&dy=0&id=p00835703143"
+                    good_stock['daily_chart'] = url
+                    url = "https://stockcharts.com/h-sc/ui?s="+info['symbol']+"&p=D&b=5&g=0&id=p05555723250"
+                    good_stock['5mo_chart'] = url
 
                 if great_stock:
                     print(info['symbol']+" stock good")
@@ -329,6 +396,7 @@ def write_symbol_to_csv(symbol, exchange, cache=False, get_any_stock=False):
     ''''''
     start_time = time.time()
     stock = get_symbol_object(symbol, exchange)
+ 
     # cache these results
     stock_data_path = general.dataPath(symbol+"_stock_data.pkl")
     if cache:
