@@ -17,11 +17,13 @@ from datetime import datetime
 logger = general.getCustomLogger("log.txt")
 
 def is_composite_stock(stock_info):
-    for symbol in ["^IXIC", "^NYA", "^DJI", "^SPX"]:
-        if stock_info['symbol'] in symbol:
-            return True
-    else:
+    try:
+        for symbol in ["^IXIC", "IXIC", "^NYA", "NYA", "^DJI", "DJI", "^SPX", "SPX"]:
+            if stock_info.get('symbol') == symbol:
+                return True
+    except:
         return False
+    return False
 
 def get_composite_stock_symbols(stock_info):
     # For yahoo finance tool
@@ -77,16 +79,16 @@ def get_all_symbols():
     # NYSE = ^NYA
     # Dow  = ^DJI 
     # SP500 = ^SPX
-def get_all_symbol_object(add_composites=True):
+def get_all_symbol_object(add_composites=True, blacklist=[]):
     ticker_list = get_all_symbols()
+    if add_composites:
+        ticker_list.append({'Code': "^IXIC", 'Exchange': "NASDAQ"})
+        ticker_list.append({'Code': "^NYA", 'Exchange': "NYSE"})
+
     stock_data = []
     for ticker in ticker_list:
-        data = yf.Ticker(ticker['Code'])
-        stock_data.append({"data":data, "exchange":ticker['Exchange']})
-    if add_composites:
-        composites = ["^IXIC", "^NYA"]
-        for composite in composites:
-            data = yf.Ticker(composite)
+        if {"symbol": ticker['Code'], "exchange": ticker['Exchange']} not in blacklist:
+            data = yf.Ticker(ticker['Code'])
             stock_data.append({"data":data, "exchange":ticker['Exchange']})
     return stock_data
 
@@ -296,7 +298,7 @@ def get_good_stock_data(stock, get_any_stock=False):
             great_stock = False
             if (large_cap(info['marketCap']) and good_dividend(info['dividendYield']) and good_instutional_ownership(info['heldPercentInstitutions']) and affordable_price(info['currentPrice']) and good_pb_ratio(info['priceToBook']) and good_pe_ratio(info['forwardPE'])):
                 great_stock = True
-            if get_any_stock or great_stock:
+            if get_any_stock or great_stock or is_composite_stock(info):
                 # Composite stocks (SP500, DOW jones, etc) don't have earnings
                 if is_composite_stock(info):
                     good_stock['nextEarningsDate'] = "NA"
@@ -323,7 +325,7 @@ def get_good_stock_data(stock, get_any_stock=False):
                     good_stock['4years_increasing_profit'] = increasing_income(yearly_earnings_info)
 
                     # we only want 4 quarters increasing revenue or last 4 years increasing revenue/income
-                    if (get_any_stock == False) and not (good_stock['4Quarters_increasing_revenue'] or (good_stock['4years_increasing_revenue'] and good_stock['4years_increasing_profit'])):
+                    if is_composite_stock(info) or ((get_any_stock == False) and not (good_stock['4Quarters_increasing_revenue'] or (good_stock['4years_increasing_revenue'] and good_stock['4years_increasing_profit']))):
                         print(good_stock['symbol']+" is a good stock but has a bad income report. Skipping...")
                         logger.debug(good_stock['symbol']+" is a good stock but has a bad income report. Skipping...")
                         return None
@@ -360,8 +362,8 @@ def get_good_stock_data(stock, get_any_stock=False):
                     print(info['symbol']+" stock good")
                     logger.debug(info['symbol']+" stock good")
                 else:
-                    print("This was a bad stock but returning results anyway")
-                    logger.debug("This was a bad stock but returning results anyway")
+                    print(info['symbol']+" was a bad stock but returning results anyway")
+                    logger.debug(info['symbol']+" was a bad stock but returning results anyway")
                 return good_stock
             return None
     except Exception as e:
@@ -369,6 +371,8 @@ def get_good_stock_data(stock, get_any_stock=False):
         logger.debug(e)
         return None
 
+# this function is because we don't want to see all of the keys in excel
+# we just want the most important details about the stock
 def clean_for_csv(good_stocks):
     keys_to_delete = ['sharesOutstanding', 'floatShares', 'debtToEquity', 'returnOnEquity', 'returnOnAssets', 'grossProfits', 'profitMargins', 'totalRevenue', 'debtToAssetsRatio', 'forwardEps', 'trailingEps', 'marketCap', '']
     if isinstance(good_stocks, list):
@@ -393,9 +397,7 @@ def clean_for_csv(good_stocks):
 # BIIB stock good
 def write_symbol_to_csv(symbol, exchange, cache=False, get_any_stock=False):
     ''''''
-    start_time = time.time()
     stock = get_symbol_object(symbol, exchange)
- 
     # cache these results
     stock_data_path = general.dataPath(symbol+"_stock_data.pkl")
     if cache:
@@ -403,31 +405,47 @@ def write_symbol_to_csv(symbol, exchange, cache=False, get_any_stock=False):
     else:
         stock_data = None
 
+    # generate new data
     if stock_data is None:
-        stock_data = []
-        good_stock = get_good_stock_data(stock, get_any_stock=get_any_stock)
-        if good_stock is not None:
-            stock_data.append(good_stock)
+        stock_data = get_good_stock_data(stock, get_any_stock=get_any_stock)
+        if stock_data is not None:
+            stock_data = clean_for_csv(stock_data)
+            stock_csv_path = general.resultsPath(symbol+"_stock_data.csv")
+            general.listOfDictsToCSV([stock_data], stock_csv_path)
+        else:
+            print(symbol+" is not a good stock")
+            logger.debug(symbol+" is not a good stock")
         general.fileSaveCache(stock_data_path, stock_data)
-        print("--- %s seconds to get all stock data  ---" % (round(time.time() - start_time,2)))
-        logger.debug("--- %s seconds to get all stock data  ---" % (round(time.time() - start_time,2)))
-    # write to CSV
-    if stock_data != []:
-        stock_data = clean_for_csv(stock_data)
-        stock_csv_path = general.resultsPath(symbol+"_stock_data.csv")
-        general.listOfDictsToCSV(stock_data, stock_csv_path)
+        return stock_data
+    # use cached data
     else:
-        print(symbol+" is not a good stock")
-        logger.debug(symbol+" is not a good stock")
-    return stock_data
+        return stock_data
 
 # 118m to get through NASDAQ
 # 165m to get through NYSE
 # 283m total
-def write_symbols_to_csv(cache=False):
+def write_symbols_to_csv(added_tickers=[],blacklisted_tickers=[],do_all_tickers=True,cache=False):
+    '''
+    format for added tickers is:
+    [{'symbol': "GOOG", 'exchange': "NASDAQ"}, ...]
+
+    format for blacklisted tickers is:
+    [{'symbol': "GOOG", 'exchange': "NASDAQ"}, ...]
+    '''
     start_time = time.time()
-    stocks = get_all_symbol_object()
-    count = 1
+    stocks = []
+    if do_all_tickers:
+        stocks = get_all_symbol_object(blacklist=blacklisted_tickers)
+    added_ticker_objects = []
+    for ticker in added_tickers:
+        object = get_symbol_object(ticker['symbol'],ticker['exchange'])
+        if ticker not in blacklisted_tickers:
+            stocks.append(object)
+            added_ticker_objects.append(object)
+        else:
+            if object in stocks:
+                stocks.remove(object)
+
     # cache these results
     stock_data_path = general.dataPath("all_stock_data.pkl")
     if cache:
@@ -440,16 +458,20 @@ def write_symbols_to_csv(cache=False):
         logger.debug("Starting download of stock data... this should take about 4-6 hours.")
         count = 0
         percent_increment = 100 / len(stocks)
+        
         stock_data = []
         for stock in stocks:
-            count+=count
+            count+=1
             progress = (count + 1) * percent_increment
-            # Print the progress every 10 percent
-            if progress % 10 == 0:
+            # Print the progress every 100 elements
+            if count % 100 == 0:
                 print(f'{progress}% complete')
                 logger.debug(f'{progress}% complete')
             # get stock data
-            good_stock = get_good_stock_data(stock)
+            if stock in added_ticker_objects:
+                good_stock = get_good_stock_data(stock, get_any_stock=True)
+            else:
+                good_stock = get_good_stock_data(stock)
             if good_stock is not None:
                 stock_data.append(good_stock)
         general.fileSaveCache(stock_data_path, stock_data)
@@ -460,17 +482,6 @@ def write_symbols_to_csv(cache=False):
         stock_data = clean_for_csv(stock_data)
         stock_csv_path = general.resultsPath("all_stock_data.csv")
         general.listOfDictsToCSV(stock_data, stock_csv_path)
-        # write dividend stocks to seperate file
-        # removing this code for now as our current criteria requiers a dividend
-        # dividend_symbols = []
-        # for symbol in stock_data:
-        #     if good_dividend(symbol['dividendYield']):
-        #         dividend_symbols.append(symbol)
-        # if dividend_symbols != []:
-        #     stock_csv_path = general.resultsPath("dividend_stock_data.csv")
-        #     general.listOfDictsToCSV(dividend_symbols, stock_csv_path)
-        # else:
-        #     print("No dividend stocks found")
     else:
         print("No good stocks found")
         logger.debug("No good stocks found")

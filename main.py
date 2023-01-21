@@ -13,13 +13,19 @@ logger.debug("starting this script on: "+today)
 # List of stocks to get technical indicator data on
 #NASDAQ_symbols = ['CSX', 'AMD', 'GOOGL', 'AMZN', 'DBX', 'AAPL', 'SBUX', 'MSFT', 'CSCO', 'TSCO', 'NVDA']
 #NYSE_symbols = ['BAC', 'SYF', 'IBM', 'DKS', 'KR', 'UNH', 'DUK', 'TM', 'CNI', 'V', 'DE', 'FE', 'MA', 'O', 'LMT', 'WMT', 'DGX', 'WM', 'GIS', 'JPM', 'T', 'ABBV', 'JNJ', 'VALE', 'LOW', 'LEN', 'CVX', 'XOM', 'CAT', 'NKE']
-NASDAQ_symbols = [] #symbols to add: 'AEP', 'CME'
-NYSE_symbols = [] #symbols to add: 'AFL', 'CAT', 'VISA', 'JNJ', 'DUK'
+NASDAQ_symbols = []
+NYSE_symbols = [] 
+added_stocks = [{'symbol': "AEP", 'exchange': "NASDAQ"},{'symbol': "CME", 'exchange': "NASDAQ"},
+                {'symbol': "SBUX", 'exchange': "NASDAQ"},
+                {'symbol': "AFL", 'exchange': "NYSE"},{'symbol': "CAT", 'exchange': "NYSE"},
+                {'symbol': "V", 'exchange': "NYSE"},{'symbol': "JNJ", 'exchange': "NYSE"},
+                {'symbol': "DUK", 'exchange': "NYSE"}]
+blacklisted = []
 
 # Get fundamental analysis symbols and data
 print("Getting Fundamental analysis symbols and data...\n")
 logger.debug("Getting Fundamental analysis symbols and data...")
-list_of_dicts = get_fundamental_indicators.write_symbols_to_csv(cache=False)
+list_of_dicts = get_fundamental_indicators.write_symbols_to_csv(added_tickers=added_stocks,blacklisted_tickers=blacklisted, cache=False)
 for dict in list_of_dicts:
     if dict['exchange'] == "NYSE":
         if dict['symbol'] not in NYSE_symbols:
