@@ -16,7 +16,6 @@ logger.debug("starting this script on: "+today)
 NASDAQ_symbols = []
 NYSE_symbols = [] 
 added_stocks = [{'symbol': "AEP", 'exchange': "NASDAQ"},{'symbol': "CME", 'exchange': "NASDAQ"},
-                {'symbol': "SBUX", 'exchange': "NASDAQ"},
                 {'symbol': "AFL", 'exchange': "NYSE"},{'symbol': "CAT", 'exchange': "NYSE"},
                 {'symbol': "V", 'exchange': "NYSE"},{'symbol': "JNJ", 'exchange': "NYSE"},
                 {'symbol': "DUK", 'exchange': "NYSE"}]
