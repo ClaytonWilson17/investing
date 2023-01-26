@@ -367,8 +367,6 @@ def get_good_stock_data(stock, get_any_stock=False):
                 return good_stock
             return None
     except Exception as e:
-        print(e)
-        logger.debug(e)
         return None
 
 # this function is because we don't want to see all of the keys in excel
@@ -464,7 +462,7 @@ def write_symbols_to_csv(added_tickers=[],blacklisted_tickers=[],do_all_tickers=
             count+=1
             progress = (count + 1) * percent_increment
             # Print the progress every 100 elements
-            if count % 100 == 0:
+            if count % 1000 == 0:
                 print(f'{progress}% complete')
                 logger.debug(f'{progress}% complete')
             # get stock data
