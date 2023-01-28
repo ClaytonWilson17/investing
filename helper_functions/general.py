@@ -151,8 +151,7 @@ def clean_list_of_dicts(list_of_dicts):
 def get_historical_indicators(sym, days_ago):
     logger = getCustomLogger("log.txt")
     today = datetime.now() 
-    print ('Attempting to load historical technical indicator data...')
-    logger.debug('Attempting to load historical technical indicator data...')
+    
     file_does_not_exist = True
     while file_does_not_exist == True:
         if days_ago > 60:
@@ -167,7 +166,7 @@ def get_historical_indicators(sym, days_ago):
             file_does_not_exist = False
         else:
             print ("There is no past for: " + str(past_date) + ". Going back one more day")
-            logger.debug("There is no past for: " + str(past_date) + ". Going back one more day")
+            # logger.debug("There is no past for: " + str(past_date) + ". Going back one more day") 
             days_ago = days_ago + 1
     
     data = fileLoadCache(data_path, datestamp=False)
