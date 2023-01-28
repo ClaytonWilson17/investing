@@ -1,3 +1,5 @@
 *.env
 *.pyc
 *.nfs*
+data
+results

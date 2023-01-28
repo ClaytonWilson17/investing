@@ -13,6 +13,17 @@ parser.add_argument("--technical_only", action="store_true")
 args = parser.parse_args()
 
 
+# delete previous log file and create a new blank file
+if not os.path.exists("data"):
+    os.makedirs("data")
+log_path = general.dataPath('log.txt')
+if os.path.exists(log_path):
+    os.remove(log_path)
+    print(f'{log_path} has been deleted.')
+else:
+    print(f'{log_path} does not exist.')
+with open(log_path, 'w'):
+    pass
 
 today = datetime.now()
 today = today.strftime("%m/%d/%y %H:%M")
