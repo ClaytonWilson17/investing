@@ -25,6 +25,7 @@ else:
 with open(log_path, 'w'):
     pass
 
+
 today = datetime.now()
 today = today.strftime("%m/%d/%y %H:%M")
 print("starting this script on: "+today)
@@ -43,9 +44,20 @@ blacklisted = []
 
 
 # Get fundamental analysis symbols and data if the command line arg 'technical_only' doesnt specify otherwise
+recent_fundamentals = []
+
 if args.technical_only:
-    NASDAQ_symbols = ["ADI", "AEP", "AMAT", "CSCO", "CSX", "FAST", "MCHP", "NTRS", "TROW", "XEL", "IXIC", "AEP", "CME"]
-    NYSE_symbols = ["ABT", "AVY", "BAX", "BBY", "CAH", "CHD", "CNI", "CVS", "DGX", "DHI", "DOV", "DTE", "GIS", "IFF", "JPM", "MMC", "OKE", "PFE", "PG", "RF", "RSG", "SCHW", "SU", "TEL", "TFC", "TRV", "TSN", "VICI", "VZ", "WM", "NYA", "AFL", "CAT", "V", "JNJ"]
+    logger.debug("You have selected to run this script in technical_only mode")
+    NASDAQ_symbols = []
+    NYSE_symbols = []
+    recent_fundamentals = general.get_most_recent_fundamentals()
+    for dict in recent_fundamentals:
+        if dict['exchange'] == "NYSE":
+            if dict['symbol'] not in NYSE_symbols:
+                NYSE_symbols.append(dict['symbol'])
+        if dict['exchange'] == "NASDAQ":
+            if dict['symbol'] not in NASDAQ_symbols:
+                NASDAQ_symbols.append(dict['symbol'])
 
 else:
     print("Getting Fundamental analysis symbols and data...\n")
