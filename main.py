@@ -2,8 +2,16 @@
 
 from helper_functions import custom_signal, get_technical_indicators, sell_signal, general, send_email, get_fundamental_indicators, markus_signal
 import os
+import sys
 from datetime import datetime, date
+import argparse
 logger = general.getCustomLogger("log.txt")
+
+# Get argument
+parser = argparse.ArgumentParser()
+parser.add_argument("--technical_only", action="store_true")
+args = parser.parse_args()
+
 
 # delete previous log file and create a new blank file
 if not os.path.exists("data"):
@@ -16,6 +24,7 @@ else:
     print(f'{log_path} does not exist.')
 with open(log_path, 'w'):
     pass
+
 
 today = datetime.now()
 today = today.strftime("%m/%d/%y %H:%M")
@@ -33,23 +42,40 @@ added_stocks = [{'symbol': "AEP", 'exchange': "NASDAQ"},{'symbol': "CME", 'excha
                 {'symbol': "DUK", 'exchange': "NYSE"}]
 blacklisted = []
 
-# Get fundamental analysis symbols and data
-print("Getting Fundamental analysis symbols and data...\n")
-logger.debug("Getting Fundamental analysis symbols and data...")
-list_of_dicts = get_fundamental_indicators.write_symbols_to_csv(added_tickers=added_stocks,blacklisted_tickers=blacklisted, cache=False)
-for dict in list_of_dicts:
-    if dict['exchange'] == "NYSE":
-        if dict['symbol'] not in NYSE_symbols:
-            NYSE_symbols.append(dict['symbol'])
-    if dict['exchange'] == "NASDAQ":
-        if dict['symbol'] not in NASDAQ_symbols:
-            NASDAQ_symbols.append(dict['symbol'])
+
+# Get fundamental analysis symbols and data if the command line arg 'technical_only' doesnt specify otherwise
+recent_fundamentals = []
+
+if args.technical_only:
+    logger.debug("You have selected to run this script in technical_only mode")
+    NASDAQ_symbols = []
+    NYSE_symbols = []
+    recent_fundamentals = general.get_most_recent_fundamentals()
+    for dict in recent_fundamentals:
+        if dict['exchange'] == "NYSE":
+            if dict['symbol'] not in NYSE_symbols:
+                NYSE_symbols.append(dict['symbol'])
+        if dict['exchange'] == "NASDAQ":
+            if dict['symbol'] not in NASDAQ_symbols:
+                NASDAQ_symbols.append(dict['symbol'])
+
+else:
+    print("Getting Fundamental analysis symbols and data...\n")
+    logger.debug("Getting Fundamental analysis symbols and data...")
+    list_of_dicts = get_fundamental_indicators.write_symbols_to_csv(added_tickers=added_stocks,blacklisted_tickers=blacklisted, cache=False)
+    for dict in list_of_dicts:
+        if dict['exchange'] == "NYSE":
+            if dict['symbol'] not in NYSE_symbols:
+                NYSE_symbols.append(dict['symbol'])
+        if dict['exchange'] == "NASDAQ":
+            if dict['symbol'] not in NASDAQ_symbols:
+                NASDAQ_symbols.append(dict['symbol'])
 
 # Get technical indicators for all stocks
 print("Getting technical analysis data...\n")
 logger.debug("Getting technical analysis data...")
 technical_data = []
-technical_data =get_technical_indicators.get_tech_indicators(NYSE_symbols=NYSE_symbols, NASDAQ_symbols=NASDAQ_symbols)
+technical_data = get_technical_indicators.get_tech_indicators(NYSE_symbols=NYSE_symbols, NASDAQ_symbols=NASDAQ_symbols)
 # Returns the following keys: Symbol, Price, RSI, Pivot middle, Pivot support 1, Pivot support 2, MACD_line, MACD_signal, Keltner lower, Keltner upper
 
 # Store indicators to be used as a reference in the future:
@@ -60,39 +86,11 @@ general.fileSaveCache(data_path, technical_data, datestamp=True)
 historical_indicators = general.fileLoadCache(data_path)
 
 
-'''
-
-# Find stocks based on custom signal
-stocks_to_buy = []
-for data in technical_data:
-    signal = custom_signal.determine_signals(data['Price'], data['RSI'], data['Pivot support 1'], data['Keltner lower'])
-    if signal[0] == 'buy':
-        data['Based on Indicators'] = signal[1]
-        data['Signal'] = signal[0]
-        stocks_to_buy.append(data)
-    else:
-        print (str(data['Symbol']) + " did not pass the Custom signal")
-custom_stocks_to_buy = general.clean_list_of_dicts(stocks_to_buy)
-
-for stocks in custom_stocks_to_buy:
-    for fundamental_data in list_of_dicts:
-        if stocks['Symbol'] == fundamental_data['symbol']:
-            stocks.update(fundamental_data)
-
-custom_path = general.resultsPath('Custom Signal.csv')
-if len(custom_stocks_to_buy) > 0:
-    general.listOfDictsToCSV(custom_stocks_to_buy, custom_path)
-'''
-
-
-
-
-
-
 
 # Find stocks based on Markus signal
 print("Finding any buy or sell signals based on markus functions\n")
 logger.debug("Finding any buy or sell signals based on markus functions")
+logger.debug('Attempting to load historical technical indicator data...')
 stocks_to_buy = []
 stocks_to_sell = []
 for data in technical_data:
@@ -115,7 +113,11 @@ for data in technical_data:
 markus_stocks_to_buy = general.clean_list_of_dicts(stocks_to_buy)
 markus_stocks_to_sell = general.clean_list_of_dicts(stocks_to_sell)
 
-# Add fundamental analysis data back to dictionary
+# Add fundamental analysis data back to dictionary if in regular mode, otherwise add the most recent fundamental analysis back
+if args.technical_only:
+    fundamental_path = general.dataPath("all_stock_data.pkl")
+    list_of_dicts = general.fileLoadCache(fundamental_path ,datestamp=True)
+
 for stocks in markus_stocks_to_buy:
     for fundamental_data in list_of_dicts:
         if stocks['Symbol'] == fundamental_data['symbol']:
@@ -124,6 +126,7 @@ for stocks in markus_stocks_to_sell:
     for fundamental_data in list_of_dicts:
         if stocks['Symbol'] == fundamental_data['symbol']:
             stocks.update(fundamental_data)
+
 
 
 # Output results from markus indicator to csv and store the file path to email later
@@ -152,15 +155,18 @@ files.append(all_stock_data)
 general.get_env_vars()
 subject = "Stock signals for the day " + str(datetime.today().strftime('%Y-%m-%d'))
 
-# Get which stocks were added or removed from our list of good stocks
-deltas = get_fundamental_indicators.get_delta()
+
 body = """Hello humans, please see the attached csv files for the current buy and sell signals for the day...  buy (sell a put)  sell (sell a call)\n\n
 We analyze stocks every day. We monitor their changes. If a stock is removed, you should probably stop investing in it because it no longer meets our criteria.\n"""
-body = body + "Added stocks: "+','.join(deltas['added'])+"\n"
-body = body + "Removed stocks: "+','.join(deltas['removed'])+"\n"
+
+# Get which stocks were added or removed from our list of good stocks
+if not args.technical_only:
+    deltas = get_fundamental_indicators.get_delta()
+    body = body + "Added stocks: "+','.join(deltas['added'])+"\n"
+    body = body + "Removed stocks: "+','.join(deltas['removed'])+"\n"
 
 receiver_emails = []
-receiver_emails.append(os.environ['simon_email'])
+#receiver_emails.append(os.environ['simon_email'])
 receiver_emails.append(os.environ['clayton_email'])
 
 print("Send out emails with any files generated attached\n")
