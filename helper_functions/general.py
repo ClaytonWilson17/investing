@@ -186,30 +186,37 @@ def get_historical_indicators(sym, days_ago):
 
 
 
-def get_most_recent_fundamentals():
+def find_recent_file(name):
     logger = getCustomLogger("log.txt")
     today = datetime.now() 
     days_ago = 0
     file_does_not_exist = True
     while file_does_not_exist == True:
         if days_ago > 60:
-            print ("There is no past indicator data so the Markus/Chuck signal will not work")
-            logger.debug("There is no past indicator data so the Markus/Chuck signal will not work")
+            print ("There is no past fundamental")
+            logger.debug("There is no past fundamental signal will not work")
             return 'no data'
         past_date = today - timedelta(days=days_ago)
         past_date = past_date.strftime('%Y-%m-%d')
-        data_path = dataPath("all_stock_data" + str(past_date) + ".pkl")
+        data_path = dataPath(name + str(past_date) + ".pkl")
         my_file = Path(data_path)
         if my_file.is_file():
             file_does_not_exist = False
+            print ("Using File: " + str(my_file))
         else:
             print ("There is no past for: " + str(past_date) + ". Going back one more day")
             # logger.debug("There is no past for: " + str(past_date) + ". Going back one more day") 
             days_ago = days_ago + 1
-    
+            past_date = today - timedelta(days=days_ago)
+            past_date = past_date.strftime('%Y-%m-%d')
+    return data_path
+
+
+def get_most_recent_fundamentals():
+    data_path = find_recent_file("all_stock_data")
     data = fileLoadCache(data_path, datestamp=False)
     if data is None:
-        print ("There is no past indicator data so the Markus/Chuck signal will not work")
+        print ("There is no past fundamental data")
         return 'no data'
-
     return data
+
