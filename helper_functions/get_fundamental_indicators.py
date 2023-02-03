@@ -149,8 +149,9 @@ def keys_not_missing(keys):
     if set(required_keys).issubset(set(keys)):
         return True
     else:
-        missing_keys = set(required_keys) - set(keys)
-        print("The following keys are missing:", missing_keys)
+        #uncomment for troubleshooting
+        #missing_keys = set(required_keys) - set(keys)
+        #print("The following keys are missing:", missing_keys)
         return False
 
 def quarter_to_datetime(quarter):
@@ -249,7 +250,7 @@ def get_good_stock_data(stock, get_any_stock=False):
             return None
         
         if is_composite_stock(info, symbol):
-            info = get_composite_stock_symbols(info, fast_info,symbol)
+            info = get_composite_stock_symbols(info, symbol)
             #good_stock['currentPrice'] = fast_info['regularMarketPrice']
         
         if keys_not_missing(info.keys()) or is_composite_stock(info, symbol):
@@ -376,6 +377,8 @@ def get_good_stock_data(stock, get_any_stock=False):
                 return good_stock
             return None
     except Exception as e:
+        print("An exception occurred")
+        print(e)
         return None
 
 # this function is because we don't want to see all of the keys in excel

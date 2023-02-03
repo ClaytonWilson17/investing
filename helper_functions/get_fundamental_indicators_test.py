@@ -124,5 +124,5 @@ class Testget_write_symbols_to_csv(unittest.TestCase):
 if __name__ == '__main__':
     unittest.main()
     #suite = unittest.TestSuite()
-    #suite.addTest(Testget_good_stock_data("test_retrieved_good_stock"))
+    #suite.addTest(Testget_write_symbol_to_csv("test_csv_retrieve_index_via_any_stock_option"))
     #unittest.TextTestRunner().run(suite)
