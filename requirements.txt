@@ -1,5 +1,5 @@
 tradingview_ta
 openpyxl
 pandas
-yfinance==0.2.4
+yfinance==0.2.9
 ta
