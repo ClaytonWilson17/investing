@@ -377,8 +377,6 @@ def get_good_stock_data(stock, get_any_stock=False):
                 return good_stock
             return None
     except Exception as e:
-        print("An exception occurred")
-        print(e)
         return None
 
 # this function is because we don't want to see all of the keys in excel
