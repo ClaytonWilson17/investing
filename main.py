@@ -49,6 +49,7 @@ recent_fundamentals = []
 if args.technical_only:
     logger.debug("You have selected to run this script in technical_only mode")
     recent_fundamentals = general.get_most_recent_fundamentals()
+    recent_fundamentals = recent_fundamentals + added_stocks
     for dict in recent_fundamentals:
         if 'exchange' not in dict.keys():
             dict['exchange'] = 'None'
@@ -90,11 +91,12 @@ print("Done with fundamental and technical analysis on: "+today)
 logger.debug("Done with fundamental and technical analysis on: "+today)
 
 # get the list of all stocks and their data and turn it into csv so it can be emailed out
-all_stock_data = general.find_recent_file('all_stock_data')
-list_of_dicts = general.fileLoadCache(all_stock_data ,datestamp=False)
-result_path = general.resultsPath('all_stock_data')
-all_stock_data = general.listOfDictsToCSV(list_of_dicts, result_path)
-files.append(result_path + '.csv')
+if not args.technical_only:
+    all_stock_data = general.find_recent_file('all_stock_data')
+    list_of_dicts = general.fileLoadCache(all_stock_data ,datestamp=False)
+    result_path = general.resultsPath('all_stock_data')
+    all_stock_data = general.listOfDictsToCSV(list_of_dicts, result_path)
+    files.append(result_path + '.csv')
 
 # Email out the files
 general.get_env_vars()
@@ -120,5 +122,5 @@ log_path = general.dataPath('log.txt')
 files.append(log_path)
 
 for reciever in receiver_emails:
-    send_email.send_email(subject=subject, body=body, receiver_email=reciever, files=files)
+    #send_email.send_email(subject=subject, body=body, receiver_email=reciever, files=files)
     None

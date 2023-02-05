@@ -54,6 +54,8 @@ def determine_signals(technical_stock_data):
         new_dict['Symbol'] = stock['Symbol']
         new_dict['Price'] = stock['Price']
         new_dict['Signal'] = 'none'
+        new_dict['daily_chart'] = "https://stockcharts.com/h-sc/ui?s="+stock['Symbol']+"&p=D&yr=0&mn=1&dy=0&id=p00835703143"
+        new_dict['5mo_chart'] = "https://stockcharts.com/h-sc/ui?s="+stock['Symbol']+"&p=D&b=5&g=0&id=p05555723250"
 
         if markus_result == 'buy':
             new_dict['Signal'] = 'Markus Buy Signal'
