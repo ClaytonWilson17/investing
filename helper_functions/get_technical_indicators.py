@@ -21,7 +21,7 @@ def get_tech_indicators(NYSE_symbols, NASDAQ_symbols):
 
     Output:
 
-    list of dictionaries with keys - Symbol, Price, RSI, Pivot middle, Pivot support 1, Pivot support 2, MACD_line, MACD_signal, Keltner lower, Keltner upper Chart Link
+    list of dictionaries with keys - Symbol, Price, RSI, Pivot middle, Pivot support 1, Pivot support 2, MACD_line, MACD_signal, Keltner lower, Keltner upper
     '''
     stock_data = []
 

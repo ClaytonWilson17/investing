@@ -165,7 +165,7 @@ def get_historical_indicators(sym, days_ago):
         if my_file.is_file():
             file_does_not_exist = False
         else:
-            print ("There is no past for: " + str(past_date) + ". Going back one more day")
+            # print ("There is no past for: " + str(past_date) + ". Going back one more day")
             # logger.debug("There is no past for: " + str(past_date) + ". Going back one more day") 
             days_ago = days_ago + 1
     
