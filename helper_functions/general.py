@@ -149,7 +149,6 @@ def clean_list_of_dicts(list_of_dicts):
 
 
 def get_historical_indicators(sym, days_ago):
-    logger = getCustomLogger("log.txt")
     today = datetime.now() 
     
     file_does_not_exist = True

@@ -261,6 +261,8 @@ def get_good_stock_data(stock, get_any_stock=False):
             good_stock['shortName'] = info['shortName']
             good_stock['industry'] = info['industry']
             good_stock['symbol'] = symbol
+            if is_composite_stock(info, symbol):
+                good_stock['symbol'] = info['comp_symbol']
             good_stock['exchange'] = stock['exchange']
             good_stock['currentPrice'] = fast_info['last_price']
             good_stock['marketCap'] = fast_info['market_cap']
@@ -504,7 +506,6 @@ def get_delta():
         today_stocks = general.fileLoadCache(today_path, datestamp=False)
 
         # attempt to get yesterday's stock file if it exists, otherwise keep going back to the day before
-        logger = general.getCustomLogger("log.txt")
         days_ago = 1
         today = datetime.now() 
         file_does_not_exist = True
