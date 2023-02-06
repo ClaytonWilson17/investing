@@ -5,7 +5,6 @@ import os
 import sys
 from datetime import datetime, date
 import argparse
-logger = general.getCustomLogger("log.txt")
 
 # Get argument
 parser = argparse.ArgumentParser()
@@ -25,6 +24,7 @@ else:
 with open(log_path, 'w'):
     pass
 
+logger = general.getCustomLogger("log.txt")
 
 today = datetime.now()
 today = today.strftime("%m/%d/%y %H:%M")
