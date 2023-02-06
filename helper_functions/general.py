@@ -105,7 +105,7 @@ def getCustomLogger(logfile_name):
     fmt = '%(levelname)8s - %(message)s'
     formatter = logging.Formatter(fmt)
     # Make the log file
-    file_handler = logging.FileHandler(filepath, mode='w')
+    file_handler = logging.FileHandler(filepath, mode='a')
     file_handler.setFormatter(formatter)
     logger.addHandler(file_handler)
     #logger.basicConfig(filename=filepath, filemode='w', format='%(name)s - %(levelname)s - %(message)s')
