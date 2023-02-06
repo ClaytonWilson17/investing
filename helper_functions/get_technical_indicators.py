@@ -28,6 +28,9 @@ def get_tech_indicators(NYSE_symbols, NASDAQ_symbols):
     # Get the data for all stocks
     print ("\nCollecting data for all stocks...\n")
     for sym in NASDAQ_symbols:
+        # doesn't accept any symbols with "^"
+        if "^" in sym:
+            sym = sym.replace("^", "")
         request = TA_Handler(screener='america', exchange='NASDAQ', symbol=sym, interval=Interval.INTERVAL_1_DAY)
         request.add_indicators(indicators=["KltChnl.lower", "KltChnl.upper"])
         output = request.get_indicators()
@@ -53,6 +56,8 @@ def get_tech_indicators(NYSE_symbols, NASDAQ_symbols):
         stock_data.append(new_dict)
 
     for sym in NYSE_symbols:
+        if "^" in sym:
+            sym = sym.replace("^", "")
         request = TA_Handler(screener='america', exchange='NYSE', symbol=sym, interval=Interval.INTERVAL_1_DAY)
         request.add_indicators(indicators=["KltChnl.lower", "KltChnl.upper"])
         output = request.get_indicators()
