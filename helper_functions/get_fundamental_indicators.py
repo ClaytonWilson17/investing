@@ -78,7 +78,7 @@ def get_all_symbols():
     # NYSE = ^NYA
     # Dow  = ^DJI 
     # SP500 = ^SPX
-def get_all_symbol_object(add_composites=True, blacklist=[]):
+def get_all_symbol_object(add_composites=False, blacklist=[]):
     ticker_list = get_all_symbols()
     if add_composites:
         ticker_list.append({'Code': "^IXIC", 'Exchange': "NASDAQ"})
