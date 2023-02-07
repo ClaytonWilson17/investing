@@ -21,16 +21,17 @@ def markus_signal(rsi, stochastic, macd_line, signal_line):
     # decide if there is a buy signal
     if float(rsi) > float(50): 
         if float(stochastic) > float(50):
-            if macd_line > signal_line:
+            if macd_line > signal_line and macd_line < float(0):
                 signal = 'buy'
 
     # decide if there is a sell signal
     if float(rsi) < float(50):
         if float(stochastic) < float(50):
-            if macd_line < signal_line:
+            if macd_line < signal_line and macd_line > float(0):
                 signal = 'sell'
 
     return (signal)
+
 
 
 def determine_signals(technical_stock_data):
@@ -54,8 +55,8 @@ def determine_signals(technical_stock_data):
         new_dict['Symbol'] = stock['Symbol']
         new_dict['Price'] = stock['Price']
         new_dict['Signal'] = 'none'
-        new_dict['daily_chart'] = "https://stockcharts.com/h-sc/ui?s="+stock['Symbol']+"&p=D&yr=0&mn=1&dy=0&id=p00835703143"
-        new_dict['5mo_chart'] = "https://stockcharts.com/h-sc/ui?s="+stock['Symbol']+"&p=D&b=5&g=0&id=p05555723250"
+        #new_dict['daily_chart'] = "https://stockcharts.com/h-sc/ui?s="+stock['Symbol']+"&p=D&yr=0&mn=1&dy=0&id=p00835703143"
+        #new_dict['5mo_chart'] = "https://stockcharts.com/h-sc/ui?s="+stock['Symbol']+"&p=D&b=5&g=0&id=p05555723250"
 
         if markus_result == 'buy':
             new_dict['Signal'] = 'Markus Buy Signal'
@@ -72,6 +73,18 @@ def determine_signals(technical_stock_data):
 
         if new_dict['Signal'] == 'Markus Sell Signal' or new_dict['Signal'] == 'S&R Sell Signal':
             stocks_with_sell_signal.append(new_dict)
+
+    # add fundamental data back in 
+    fundamentals = general.get_most_recent_fundamentals()
+    for stock in stocks_with_buy_signal:
+        for fund in fundamentals:
+            if stock['Symbol'] == fund['symbol']:
+                stock.update(fund)
+    fundamentals = general.get_most_recent_fundamentals()
+    for stock in stocks_with_sell_signal:
+        for fund in fundamentals:
+            if stock['Symbol'] == fund['symbol']:
+                stock.update(fund)
 
     result_paths = []    
     

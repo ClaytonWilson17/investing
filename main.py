@@ -122,5 +122,5 @@ log_path = general.dataPath('log.txt')
 files.append(log_path)
 
 for reciever in receiver_emails:
-    #send_email.send_email(subject=subject, body=body, receiver_email=reciever, files=files)
+    send_email.send_email(subject=subject, body=body, receiver_email=reciever, files=files)
     None

@@ -213,8 +213,8 @@ def find_recent_file(name):
 
 
 def get_most_recent_fundamentals():
-    data_path = find_recent_file("all_stock_data")
-    data = fileLoadCache(data_path, datestamp=False)
+    data_path = dataPath("all_stock_data.csv")
+    data = CSVToListOfDicts(data_path)
     if data is None:
         print ("There is no past fundamental data")
         return 'no data'
