@@ -42,12 +42,15 @@ def determine_signals(technical_stock_data):
     output:
     the paths to the csv files generated
     '''
+    logger = general.getCustomLogger("log.txt")
     stocks_with_buy_signal = []
     stocks_with_sell_signal = []
 
-    print ("Checking for buy and sell signals")
 
     for stock in technical_stock_data:
+        print("Determining buy/sell for symbol: " + str(stock['Symbol']))
+        logger.debug("Determining buy/sell for symbol: " + str(stock['Symbol']))
+
         markus_result = markus_signal(stock['RSI'], stock['Stochastic'], stock['MACD_line'], stock['MACD_signal'])
         support_resistance_result = support_resistance(stock['Price'], stock['Pivot support 1'], stock['Pivot resistance 1'])
 
@@ -75,6 +78,8 @@ def determine_signals(technical_stock_data):
             stocks_with_sell_signal.append(new_dict)
 
     # add fundamental data back in 
+    print("Getting the most recent fundamentals to add the fundamental columns to stocks with buy/sell signal...")
+    logger.debug("Getting the most recent fundamentals to add the fundamental columns to stocks with buy/sell signal...")
     fundamentals = general.get_most_recent_fundamentals()
     for stock in stocks_with_buy_signal:
         for fund in fundamentals:

@@ -1,6 +1,6 @@
 # Main file which controls all of the inputs to the functions
 
-from helper_functions import custom_signal, get_technical_indicators, sell_signal, general, send_email, get_fundamental_indicators, markus_signal
+from helper_functions import custom_signal, get_technical_indicators, general, send_email, get_fundamental_indicators
 import os
 import sys
 from datetime import datetime, date
@@ -11,18 +11,21 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--technical_only", action="store_true")
 args = parser.parse_args()
 
+'''
 # delete previous log file and create a new blank file
 if not os.path.exists("data"):
     os.makedirs("data")
 log_path = general.dataPath('log.txt')
 if os.path.exists(log_path):
+    with open(log_path, 'w'):
+        pass
     os.remove(log_path)
     print(f'{log_path} has been deleted.')
 else:
     print(f'{log_path} does not exist.')
 with open(log_path, 'w'):
     pass
-
+'''
 logger = general.getCustomLogger("log.txt")
 
 today = datetime.now()
@@ -80,6 +83,8 @@ technical_data = get_technical_indicators.get_tech_indicators(NYSE_symbols=NYSE_
 
 
 # run the signal analysis on all technical indicator data
+print("Running analysis on technical indicators to find buy/sell signals...\n")
+logger.debug("Running analysis on technical indicators to find buy/sell signals...")
 temp = custom_signal.determine_signals(technical_data)
 if temp != 'none':
     files = temp
@@ -112,7 +117,7 @@ if not args.technical_only:
     body = body + "Removed stocks: "+','.join(deltas['removed'])+"\n"
 
 receiver_emails = []
-#receiver_emails.append(os.environ['simon_email'])
+receiver_emails.append(os.environ['simon_email'])
 receiver_emails.append(os.environ['clayton_email'])
 
 print("Send out emails with any files generated attached\n")
