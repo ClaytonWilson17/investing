@@ -5,14 +5,12 @@ import os
 import sys
 from datetime import datetime, date
 import argparse
-logger = general.getCustomLogger("log.txt")
 
 # Get argument
 parser = argparse.ArgumentParser()
 parser.add_argument("--technical_only", action="store_true")
 args = parser.parse_args()
 
-'''
 # delete previous log file and create a new blank file
 if not os.path.exists("data"):
     os.makedirs("data")
@@ -24,7 +22,8 @@ else:
     print(f'{log_path} does not exist.')
 with open(log_path, 'w'):
     pass
-'''
+
+logger = general.getCustomLogger("log.txt")
 
 today = datetime.now()
 today = today.strftime("%m/%d/%y %H:%M")
