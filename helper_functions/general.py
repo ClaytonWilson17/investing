@@ -97,6 +97,23 @@ def resultsPath(filename=None):
     else:
         return path
 
+
+def static_path(filename=None):
+    '''
+    filename = (optional) the filename of the file you want to access
+    RETURNS: absolute path of your file in the static files folder
+    '''
+    root = get_git_root()
+    path = os.path.abspath(root+"/static_files/")
+    # Must ensure path to that file exists
+    if not os.path.exists(path):
+        os.makedirs(path)
+
+    if filename is not None:
+        return os.path.abspath(path+"/"+filename)
+    else:
+        return path
+
 def getCustomLogger(logfile_name):
     filepath=dataPath(logfile_name)
     logger = logging.getLogger(logfile_name)

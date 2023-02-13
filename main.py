@@ -9,9 +9,10 @@ import argparse
 # Get argument
 parser = argparse.ArgumentParser()
 parser.add_argument("--technical_only", action="store_true")
+parser.add_argument("--stored_data", action="store_true")
 args = parser.parse_args()
 
-'''
+
 # delete previous log file and create a new blank file
 if not os.path.exists("data"):
     os.makedirs("data")
@@ -25,7 +26,7 @@ else:
     print(f'{log_path} does not exist.')
 with open(log_path, 'w'):
     pass
-'''
+
 logger = general.getCustomLogger("log.txt")
 
 today = datetime.now()
@@ -50,7 +51,10 @@ recent_fundamentals = []
 
 if args.technical_only:
     logger.debug("You have selected to run this script in technical_only mode")
-    recent_fundamentals = general.get_most_recent_fundamentals()
+    if args.stored_data:
+        recent_fundamentals = general.CSVToListOfDicts(general.static_path("all_stock_data.csv"))
+    else:
+        recent_fundamentals = general.get_most_recent_fundamentals()
     recent_fundamentals = recent_fundamentals + added_stocks
     for dict in recent_fundamentals:
         if 'exchange' not in dict.keys():
