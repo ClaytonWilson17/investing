@@ -1,79 +1,117 @@
-# Determine if you should signal a stock (sell a put) based on technical indicators
+# Determine if you should signal a stock based on our own custom settings
 
-def based_on_RSI(RSI):
-    signal = None
-    if float(RSI) <= float(35):    
-        signal = 'buy'
-    return (signal)
+from helper_functions import general
 
-
-def based_on_pivot_points(current_price, support_price_1):
+def support_resistance(current_price, support_price_1, resistance_price_1):
     signal = None
     if float(current_price) <= float(support_price_1):
         signal = 'buy'
-    return (signal)
-
-
-def based_on_keltner_channel(current_price, bottom_channel):
-    signal = None
-    if float(current_price) <= float(bottom_channel):
-        signal = 'buy'
-    return (signal)
-
-
-def based_on_macd(MACD_line, MACD_signal):
-    '''
-    If the MACD line and signal line cross while they are below the zero line, signal = buy
-    '''
-    MACD_signal = float(MACD_signal)
-    MACD_line = float(MACD_line)
-    signal = None
-    
-    difference = (MACD_line - MACD_signal)
-    
-
-    # The value is set to .2 but may need to be changed, i am not sure if the values will ever actually hit 0 exactly
-    if (difference >= 0 ) and (difference < .2) and (MACD_line < 0): 
-        signal = None
-
-    return(signal)
-
-
-def determine_signals(price, RSI=None, pivot_support_1=None, lower_keltner_channel=None, macd_line=None, macd_signal=None):
-
-    '''
-    All values except price are set to None by default, it will test whatever values you input to see if there is a signal signal on one of the indicators
-
-    Returns 'buy' if you should signal the stock and False if there is no signal signal
-    '''
-    # These variables will be set to 'buy' if the technical indicators suggest to signal
-    RSI = False
-    pivot = False
-    keltner = False
-    macd = False
-    signals_that_are_buy = []
-    
-    if RSI is not None:
-        RSI = based_on_RSI(RSI)
-        if RSI == 'buy':
-            signals_that_are_buy.append("RSI")
-
-    if pivot_support_1 is not None:
-        pivot = based_on_pivot_points(price, pivot_support_1)
-        if pivot == 'buy':
-            signals_that_are_buy.append("Support1")
-
-    if lower_keltner_channel is not None:
-        keltner = based_on_keltner_channel(price, lower_keltner_channel)
-        if keltner == 'buy':
-            signals_that_are_buy.append("Keltner")
-
-    if macd_line is not None and macd_signal is not None:
-        macd = based_on_macd(macd_line, macd_signal)
-        if macd == 'buy':
-            signals_that_are_buy.append("MACD")
-
-    if RSI == 'buy' and keltner == 'buy' and pivot == 'buy':
-        return (['buy', signals_that_are_buy])
+    elif float(current_price) >= float(resistance_price_1):
+        signal = 'sell'
     else:
-        return (["No Signal", "None"])
+        signal = 'none'
+        
+    return (signal)
+
+
+
+def markus_signal(rsi, stochastic, macd_line, signal_line):
+    signal = 'none'
+
+    # decide if there is a buy signal
+    if float(rsi) > float(50): 
+        if float(stochastic) > float(50):
+            if macd_line > signal_line and macd_line < float(0):
+                signal = 'buy'
+
+    # decide if there is a sell signal
+    if float(rsi) < float(50):
+        if float(stochastic) < float(50):
+            if macd_line < signal_line and macd_line > float(0):
+                signal = 'sell'
+
+    return (signal)
+
+
+
+def determine_signals(technical_stock_data):
+    '''
+    input:
+    The output from the get_technical_indicators function
+
+    output:
+    the paths to the csv files generated
+    '''
+    logger = general.getCustomLogger("log.txt")
+    stocks_with_buy_signal = []
+    stocks_with_sell_signal = []
+
+
+    for stock in technical_stock_data:
+        print("Determining buy/sell for symbol: " + str(stock['Symbol']))
+        logger.debug("Determining buy/sell for symbol: " + str(stock['Symbol']))
+
+        markus_result = markus_signal(stock['RSI'], stock['Stochastic'], stock['MACD_line'], stock['MACD_signal'])
+        support_resistance_result = support_resistance(stock['Price'], stock['Pivot support 1'], stock['Pivot resistance 1'])
+
+        new_dict = {}
+        new_dict['Symbol'] = stock['Symbol']
+        new_dict['Price'] = stock['Price']
+        new_dict['Signal'] = 'none'
+        #new_dict['daily_chart'] = "https://stockcharts.com/h-sc/ui?s="+stock['Symbol']+"&p=D&yr=0&mn=1&dy=0&id=p00835703143"
+        #new_dict['5mo_chart'] = "https://stockcharts.com/h-sc/ui?s="+stock['Symbol']+"&p=D&b=5&g=0&id=p05555723250"
+
+        if markus_result == 'buy':
+            new_dict['Signal'] = 'Markus Buy Signal'
+        if support_resistance_result == 'buy':
+            new_dict['Signal'] = 'S&R Buy Signal'
+
+        if markus_result == 'sell':
+            new_dict['Signal'] = 'Markus Sell Signal'
+        if support_resistance_result == 'sell':
+            new_dict['Signal'] = 'S&R Sell Signal'
+        
+        if new_dict['Signal'] == 'Markus Buy Signal' or new_dict['Signal'] == 'S&R Buy Signal':
+            stocks_with_buy_signal.append(new_dict)
+
+        if new_dict['Signal'] == 'Markus Sell Signal' or new_dict['Signal'] == 'S&R Sell Signal':
+            stocks_with_sell_signal.append(new_dict)
+
+    # add fundamental data back in 
+    print("Getting the most recent fundamentals to add the fundamental columns to stocks with buy/sell signal...")
+    logger.debug("Getting the most recent fundamentals to add the fundamental columns to stocks with buy/sell signal...")
+    fundamentals = general.get_most_recent_fundamentals()
+    for stock in stocks_with_buy_signal:
+        for fund in fundamentals:
+            if stock['Symbol'] == fund['symbol']:
+                stock.update(fund)
+    fundamentals = general.get_most_recent_fundamentals()
+    for stock in stocks_with_sell_signal:
+        for fund in fundamentals:
+            if stock['Symbol'] == fund['symbol']:
+                stock.update(fund)
+
+    result_paths = []    
+    
+    if stocks_with_buy_signal:
+        buy_path = general.resultsPath('Buy Signals.csv')
+        general.listOfDictsToCSV(stocks_with_buy_signal, buy_path)
+        result_paths.append(buy_path)
+
+    if stocks_with_sell_signal:
+        sell_path = general.resultsPath('Sell Signals.csv')
+        general.listOfDictsToCSV(stocks_with_sell_signal, sell_path)
+        result_paths.append(sell_path)
+
+    if result_paths:
+        return result_paths
+    else:
+        return 'none'
+    
+
+        
+        
+        
+
+
+        

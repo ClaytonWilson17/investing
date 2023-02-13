@@ -1,6 +1,6 @@
 # Main file which controls all of the inputs to the functions
 
-from helper_functions import custom_signal, get_technical_indicators, sell_signal, general, send_email, get_fundamental_indicators, markus_signal
+from helper_functions import custom_signal, get_technical_indicators, general, send_email, get_fundamental_indicators
 import os
 import sys
 from datetime import datetime, date
@@ -9,6 +9,7 @@ import argparse
 # Get argument
 parser = argparse.ArgumentParser()
 parser.add_argument("--technical_only", action="store_true")
+parser.add_argument("--stored_data", action="store_true")
 args = parser.parse_args()
 
 
@@ -17,6 +18,8 @@ if not os.path.exists("data"):
     os.makedirs("data")
 log_path = general.dataPath('log.txt')
 if os.path.exists(log_path):
+    with open(log_path, 'w'):
+        pass
     os.remove(log_path)
     print(f'{log_path} has been deleted.')
 else:
@@ -48,10 +51,15 @@ recent_fundamentals = []
 
 if args.technical_only:
     logger.debug("You have selected to run this script in technical_only mode")
-    NASDAQ_symbols = []
-    NYSE_symbols = []
-    recent_fundamentals = general.get_most_recent_fundamentals()
+    if args.stored_data:
+        recent_fundamentals = general.CSVToListOfDicts(general.static_path("all_stock_data.csv"))
+    else:
+        recent_fundamentals = general.get_most_recent_fundamentals()
+    recent_fundamentals = recent_fundamentals + added_stocks
     for dict in recent_fundamentals:
+        if 'exchange' not in dict.keys():
+            dict['exchange'] = 'None'
+
         if dict['exchange'] == "NYSE":
             if dict['symbol'] not in NYSE_symbols:
                 NYSE_symbols.append(dict['symbol'])
@@ -76,80 +84,27 @@ print("Getting technical analysis data...\n")
 logger.debug("Getting technical analysis data...")
 technical_data = []
 technical_data = get_technical_indicators.get_tech_indicators(NYSE_symbols=NYSE_symbols, NASDAQ_symbols=NASDAQ_symbols)
-# Returns the following keys: Symbol, Price, RSI, Pivot middle, Pivot support 1, Pivot support 2, MACD_line, MACD_signal, Keltner lower, Keltner upper
-
-# Store indicators to be used as a reference in the future:
-print("Storing current technical data and then retrieving yesterdays technical data...\n")
-logger.debug("Storing current technical data and then retrieving yesterdays technical data...")
-data_path = general.dataPath("historical_indicators.pkl")
-general.fileSaveCache(data_path, technical_data, datestamp=True)
-historical_indicators = general.fileLoadCache(data_path)
 
 
+# run the signal analysis on all technical indicator data
+print("Running analysis on technical indicators to find buy/sell signals...\n")
+logger.debug("Running analysis on technical indicators to find buy/sell signals...")
+temp = custom_signal.determine_signals(technical_data)
+if temp != 'none':
+    files = temp
 
-# Find stocks based on Markus signal
-print("Finding any buy or sell signals based on markus functions\n")
-logger.debug("Finding any buy or sell signals based on markus functions")
-logger.debug('Attempting to load historical technical indicator data...')
-stocks_to_buy = []
-stocks_to_sell = []
-for data in technical_data:
-    past_data = general.get_historical_indicators(sym=data['Symbol'], days_ago=1)
-    if past_data != 'no data':
-        signal = []
-        signal = markus_signal.determine_buy_signals(RSI=data['RSI'], past_RSI=past_data['RSI'], stochastic=data['Stochastic'], past_stochastic=past_data['Stochastic'] ,macd_line=data['MACD_line'], macd_signal=data['MACD_signal'])
-        if signal[0] == 'buy':
-            print (signal)
-            data['Based on Indicators'] = signal[1]
-            data['Signal'] = signal[0]
-            stocks_to_buy.append(data)
-        signal = markus_signal.determine_sell_signals(RSI=data['RSI'], past_RSI=past_data['RSI'], stochastic=data['Stochastic'], past_stochastic=past_data['Stochastic'] ,macd_line=data['MACD_line'], macd_signal=data['MACD_signal'])
-        if signal[0] == 'sell':
-            data['Based on Indicators'] = signal[1]
-            data['Signal'] = signal[0]
-            stocks_to_sell.append(data)
-
-
-markus_stocks_to_buy = general.clean_list_of_dicts(stocks_to_buy)
-markus_stocks_to_sell = general.clean_list_of_dicts(stocks_to_sell)
-
-# Add fundamental analysis data back to dictionary if in regular mode, otherwise add the most recent fundamental analysis back
-if args.technical_only:
-    fundamental_path = general.dataPath("all_stock_data.pkl")
-    list_of_dicts = general.fileLoadCache(fundamental_path ,datestamp=True)
-
-for stocks in markus_stocks_to_buy:
-    for fundamental_data in list_of_dicts:
-        if stocks['Symbol'] == fundamental_data['symbol']:
-            stocks.update(fundamental_data)
-for stocks in markus_stocks_to_sell:
-    for fundamental_data in list_of_dicts:
-        if stocks['Symbol'] == fundamental_data['symbol']:
-            stocks.update(fundamental_data)
-
-
-
-# Output results from markus indicator to csv and store the file path to email later
-files = []
-
-markus_buy_path = general.resultsPath('Markus Buy Signal.csv')
-if len(markus_stocks_to_buy) > 0:
-    files.append(markus_buy_path)
-    general.listOfDictsToCSV(markus_stocks_to_buy, markus_buy_path)
-markus_sell_path = general.resultsPath('Markus Sell Signal.csv')
-if len(markus_stocks_to_sell) > 0:
-    files.append(markus_sell_path)
-    general.listOfDictsToCSV(markus_stocks_to_sell, markus_sell_path)
 today = datetime.now()
 today = today.strftime("%m/%d/%y %H:%M")
 print("Done with fundamental and technical analysis on: "+today)
 logger.debug("Done with fundamental and technical analysis on: "+today)
 
-#allpath = general.resultsPath('All Stocks.csv')
-#general.listOfDictsToCSV(technical_data, allpath)
-
-all_stock_data = general.resultsPath('all_stock_data.csv')
-files.append(all_stock_data)
+# get the list of all stocks and their data and turn it into csv so it can be emailed out
+if not args.technical_only:
+    all_stock_data = general.find_recent_file('all_stock_data')
+    list_of_dicts = general.fileLoadCache(all_stock_data ,datestamp=False)
+    result_path = general.resultsPath('all_stock_data')
+    all_stock_data = general.listOfDictsToCSV(list_of_dicts, result_path)
+    files.append(result_path + '.csv')
 
 # Email out the files
 general.get_env_vars()
@@ -166,12 +121,14 @@ if not args.technical_only:
     body = body + "Removed stocks: "+','.join(deltas['removed'])+"\n"
 
 receiver_emails = []
-#receiver_emails.append(os.environ['simon_email'])
+receiver_emails.append(os.environ['simon_email'])
 receiver_emails.append(os.environ['clayton_email'])
 
 print("Send out emails with any files generated attached\n")
 logger.debug("Send out emails with any files generated attached")
 log_path = general.dataPath('log.txt')
 files.append(log_path)
+
 for reciever in receiver_emails:
     send_email.send_email(subject=subject, body=body, receiver_email=reciever, files=files)
+    None

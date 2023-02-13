@@ -21,13 +21,14 @@ def get_tech_indicators(NYSE_symbols, NASDAQ_symbols):
 
     Output:
 
-    list of dictionaries with keys - Symbol, Price, RSI, Pivot middle, Pivot support 1, Pivot support 2, MACD_line, MACD_signal, Keltner lower, Keltner upper Chart Link
+    list of dictionaries with keys - Symbol, Price, RSI, Pivot middle, Pivot support 1, Pivot support 2, MACD_line, MACD_signal, Keltner lower, Keltner upper
     '''
     stock_data = []
 
     # Get the data for all stocks
-    print ("\nCollecting data for all stocks...\n")
+    print ("\nCollecting technical data for all stocks...\n")
     for sym in NASDAQ_symbols:
+        print ("Getting tech indicators for: " + str(sym))
         # doesn't accept any symbols with "^"
         if "^" in sym:
             sym = sym.replace("^", "")
@@ -41,6 +42,8 @@ def get_tech_indicators(NYSE_symbols, NASDAQ_symbols):
         new_dict['Pivot middle'] = output['Pivot.M.Classic.Middle']
         new_dict['Pivot support 1'] = output['Pivot.M.Classic.S1']
         new_dict['Pivot support 2'] = output['Pivot.M.Classic.S2']
+        new_dict['Pivot resistance 1'] = output['Pivot.M.Classic.R1']
+        new_dict['Pivot resistance 2'] = output['Pivot.M.Classic.R2']
         new_dict['MACD_line'] = output['MACD.macd']
         new_dict['MACD_signal'] = output['MACD.signal']
         new_dict['Stochastic'] = output['Stoch.D']
@@ -56,6 +59,12 @@ def get_tech_indicators(NYSE_symbols, NASDAQ_symbols):
         stock_data.append(new_dict)
 
     for sym in NYSE_symbols:
+        print ("Getting tech indicators for: " + str(sym))
+        if sym == 'SPY':
+            exchange = 'AMEX'
+        else:
+            exchange = 'NYSE'
+        request = TA_Handler(screener='america', exchange=exchange, symbol=sym, interval=Interval.INTERVAL_1_DAY)
         if "^" in sym:
             sym = sym.replace("^", "")
         request = TA_Handler(screener='america', exchange='NYSE', symbol=sym, interval=Interval.INTERVAL_1_DAY)
@@ -68,6 +77,8 @@ def get_tech_indicators(NYSE_symbols, NASDAQ_symbols):
         new_dict['Pivot middle'] = output['Pivot.M.Classic.Middle']
         new_dict['Pivot support 1'] = output['Pivot.M.Classic.S1']
         new_dict['Pivot support 2'] = output['Pivot.M.Classic.S2']
+        new_dict['Pivot resistance 1'] = output['Pivot.M.Classic.R1']
+        new_dict['Pivot resistance 2'] = output['Pivot.M.Classic.R2']
         new_dict['MACD_line'] = output['MACD.macd']
         new_dict['MACD_signal'] = output['MACD.signal']
         new_dict['Stochastic'] = output['Stoch.D']
