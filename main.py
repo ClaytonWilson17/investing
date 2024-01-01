@@ -12,7 +12,7 @@ parser.add_argument("--technical_only", action="store_true")
 parser.add_argument("--stored_data", action="store_true")
 args = parser.parse_args()
 
-
+'''
 # delete previous log file and create a new blank file
 if not os.path.exists("data"):
     os.makedirs("data")
@@ -26,7 +26,7 @@ else:
     print(f'{log_path} does not exist.')
 with open(log_path, 'w'):
     pass
-
+'''
 logger = general.getCustomLogger("log.txt")
 
 today = datetime.now()
@@ -130,5 +130,5 @@ log_path = general.dataPath('log.txt')
 files.append(log_path)
 
 for reciever in receiver_emails:
-    send_email.send_email(subject=subject, body=body, receiver_email=reciever, files=files)
+    #send_email.send_email(subject=subject, body=body, receiver_email=reciever, files=files)
     None

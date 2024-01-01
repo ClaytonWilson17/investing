@@ -57,7 +57,7 @@ def get_tech_indicators(NYSE_symbols, NASDAQ_symbols):
         new_dict['Chart Link'] = 'https://finance.yahoo.com/quote/' + str(sym) + '/chart?p=' + str(sym)
         
         stock_data.append(new_dict)
-
+        print (new_dict)
     for sym in NYSE_symbols:
         print ("Getting tech indicators for: " + str(sym))
         if sym == 'SPY':
